@@ -1,0 +1,126 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Hotel Details{% endblock %}
+
+{% block admin_content %}
+<div class="crud-container">
+    <div class="crud-card">
+        <h1 class="title">{{ hotel.name }}</h1>
+
+        <div class="hotel-info">
+            {% if hotel.image %}
+                <img src="{{ asset('uploads/images/' ~ hotel.image) }}" alt="{{ hotel.name }}" class="hotel-img">
+            {% else %}
+                <div class="no-image">No Image Available</div>
+            {% endif %}
+
+            <div class="details">
+                <p><strong>ID:</strong> {{ hotel.id }}</p>
+                <p><strong>Description:</strong> {{ hotel.description }}</p>
+                <p><strong>Price:</strong> ₱{{ hotel.price }}</p>
+                <p><strong>Location:</strong> {{ hotel.location }}</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{{ path('admin_hotels_edit', {'id': hotel.id}) }}" class="btn btn-edit">Edit</a>
+            <a href="{{ path('admin_hotels_index') }}" class="btn btn-back">Back to list</a>
+            {{ include('admin/hotels/_delete_form.html.twig') }}
+        </div>
+    </div>
+</div>
+
+<style>
+.crud-container {
+    display: flex;
+    justify-content: center;
+    padding: 50px;
+    background: transparent;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.crud-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 800px;
+    padding: 40px;
+    border: 1px solid #e0e0e0;
+}
+
+.title {
+    text-align: center;
+    color: #74C15A;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 30px;
+}
+
+.hotel-info {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+.hotel-img {
+    width: 220px;
+    height: 160px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid #74C15A;
+}
+
+.no-image {
+    width: 220px;
+    height: 160px;
+    background: #f8f8f8;
+    border: 2px dashed #74C15A;
+    border-radius: 10px;
+    color: #777;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.details p {
+    margin: 10px 0;
+    color: #333;
+    font-size: 15px;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn-edit {
+    background-color: #74C15A;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #5ca74b;
+}
+
+
+.btn-back {
+    border: 2px solid #74C15A;
+    color: #74C15A;
+}
+
+.btn-back:hover {
+    background-color: #74C15A;
+    color: white;
+}
+</style>
+{% endblock %}

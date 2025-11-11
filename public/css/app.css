@@ -1,0 +1,527 @@
+/* =======================================================
+   🌿 TRAVEL NEGOR BASE STYLES
+======================================================= */
+:root {
+  --primary-green: #74C15A;
+  --white: #ffffff;
+  --text-dark: #333333;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  background: var(--white);
+  color: var(--text-dark);
+  padding: 0;
+  scroll-behavior: smooth;
+
+}
+
+section {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+/* Remove default section padding for full-screen and login sections */
+/* .hero,
+.login-section {
+  padding: 0 !important;
+  margin: 0 !important;
+} */
+
+/* =======================================================
+   🏝️ DESTINATIONS SECTION
+======================================================= */
+.destination-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.destination-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 280px;
+  text-align: center;
+  padding: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.destination-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.destination-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.destination-card h3 {
+  color: var(--primary-green);
+  margin-top: 0;
+}
+
+/* =======================================================
+   📞 CONTACT SECTION
+======================================================= */
+.contact ul {
+  list-style: none;
+  padding: 0;
+}
+
+.contact li {
+  margin: 0.5rem 0;
+}
+
+/* =======================================================
+   🚢 NAVBAR SECTION
+======================================================= */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 4rem;
+  background-color: #83d468;
+  position: fixed;
+  top: 0;
+  width: 94%;
+  z-index: 1000;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.navbar .brand {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar ul li a {
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.navbar ul li a:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* =======================================================
+   🌄 HERO SECTION
+======================================================= */
+.hero {
+  
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  position: relative;
+  margin-bottom: 0;
+  padding: 0;
+/* ✅ Add this: background image setup */
+  background: url('../images/herobg.jpg') no-repeat center center/cover;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 450px;
+}
+
+.hero h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.5rem;
+}
+
+.hero p {
+  margin: 1rem 0;
+  font-size: 1.1rem;
+}
+
+.btn {
+  display: inline-block;
+  background: var(--primary-green);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn:hover {
+  background: #5ca146;
+}
+
+/* =======================================================
+   ℹ️ INFO & FOOTER SECTION
+======================================================= */
+.info {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+footer {
+  background: var(--primary-green);
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 0;
+}
+
+/* =======================================================
+   🔐 LOGIN & REGISTER PAGES
+======================================================= */
+.login-section {
+  height: auto;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  background: url(../images/herobg.jpg) no-repeat center center/cover;
+
+}
+
+.login-container {
+  background: #fff;
+  color: #333;
+  padding: 1.2rem 2rem; /* 🔽 smaller vertical padding */
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 500px; /* 🔽 smaller container size */
+  text-align: center;
+  margin: 2rem 1rem;
+  animation: slideUp 0.8s ease forwards;
+}
+
+.login-container h2 {
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 1.5rem;
+  color: #74C15A;
+  font-size: 1.6rem; /* 🔽 smaller title */
+  font-weight: 700;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+}
+
+.login-form .form-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.login-form label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 0.7rem; /* 🔽 slightly smaller */
+  border: 1.5px solid #74C15A;
+  border-radius: 8px;
+  outline: none;
+  background: #f9f9f9;
+  color: #333;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.login-form input:focus {
+  border-color: #74C15A;
+  box-shadow: 0 0 6px rgba(116, 193, 90, 0.5);
+}
+
+/* Roles for Register Page */
+.role-options {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.role-options input[type="checkbox"],
+.role-options input[type="radio"] {
+  display: none;
+}
+
+.role-options label {
+  background: #f5f5f5;
+  border: 1.5px solid #74C15A;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+.role-options input:checked + label {
+  background: #74C15A;
+  color: white;
+  font-weight: 600;
+}
+
+/* Button Style */
+.login-form .btn {
+  width: 100%;
+  background: #74C15A;
+  color: #fff;
+  border: none;
+  padding: 0.8rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-form .btn:hover {
+  background: #68b152;
+  transform: translateY(-2px);
+}
+
+/* Sign up / Login link */
+.signup-text {
+  margin-top: 1rem;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.signup-text a {
+  color: #74C15A;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.signup-text a:hover {
+  color: #5ea64a;
+}
+
+/* =======================================================
+   🧍 ABOUT SECTION
+======================================================= */
+.about {
+  background: #f9f9f9;
+  padding: 5rem 2rem;
+}
+
+.about .intro {
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+.about-features {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.feature {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 2rem;
+  width: 280px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.feature img {
+  width: 60px;
+  margin-bottom: 1rem;
+}
+
+.feature h3 {
+  color: var(--primary-green);
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 0.5rem;
+}
+
+.feature p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .about-features {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .feature {
+    width: 90%;
+    max-width: 400px;
+  }
+}
+
+/* ==========================================
+   🎯 FIX: Center the Login/Register Box Perfectly
+========================================== */
+
+.login-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 0; /* remove any uneven section padding */
+  background: linear-gradient(
+      rgba(36, 35, 35, 0.7),
+      rgba(24, 22, 22, 0.7)
+    ),
+  
+}
+
+/* Perfectly center the container and equalize padding */
+.login-container {
+  margin: 0 auto; /* centers it horizontally */
+  padding: 1.2rem 1.8rem; /* even padding left and right */
+  box-sizing: border-box;
+  max-width: 450px; /* slightly smaller max width */
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  margin-top: 5rem;
+}
+
+/* Adjust inner form spacing */
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-form input,
+.role-options {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* ==========================================
+   🎯 FIX: Only one User/Admin selection
+   (radio-style visual buttons)
+========================================== */
+
+.role-options input[type="radio"] {
+  display: none; /* hide default radio buttons */
+}
+
+.role-options label {
+  background: #f5f5f5;
+  border: 1.5px solid #74C15A;
+  padding: 0.4rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333;
+  font-size: 0.85rem;
+}
+
+.role-options input[type="radio"]:checked + label {
+  background: #74C15A;
+  color: white;
+  font-weight: 600;
+  transform: scale(1.05);
+}
+
+.role-options {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+
+/* .admin-dashboard {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f7f5;
+}
+
+.dashboard-container {
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+  max-width: 600px;
+}
+
+.dashboard-container h1 {
+  color: #74C15A;
+  margin-bottom: 1rem;
+}
+
+.dashboard-links .btn {
+  display: inline-block;
+  margin: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  background: #74C15A;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.dashboard-links .btn:hover {
+  background: #5aa048;
+} */ 
+

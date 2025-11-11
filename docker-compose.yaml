@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: 
+      mysql:8.0
+    restart: unless-stopped
+    environment:
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        MYSQL_DATABASE: ${MYSQL_DATABASE}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+          # mysql:docker
+          # default, mao ni basehan sa .env
+        - "3306:3306"
+    volumes:
+        - mysql_data:/var/lib/mysql
+    networks:
+        - test_demo_network
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    environment:
+        PMA_HOST: mysql
+        PMA_USER: ${MYSQL_USER}
+        PMA_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+          # mysql, docker
+      - "8080:80"
+      # dli mo start ang phpmyadmin if dli mo start ang mysql
+    depends_on:
+      - mysql
+    networks:
+      - test_demo_network
+
+volumes:
+  mysql_data: 
+
+networks:
+  test_demo_network:

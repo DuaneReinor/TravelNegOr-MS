@@ -1,0 +1,45 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Create New Destination{% endblock %}
+
+{% block admin_content %}
+<div class="crud-container">
+    <div class="crud-card">
+        <h1 class="title">Create New Destination</h1>
+
+        {{ include('admin/destinations/_form.html.twig', {'button_label': 'Create'}) }}
+
+        <div class="actions">
+            <a href="{{ path('app_destination_index') }}" class="btn btn-back">Back to list</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.crud-container {
+    display: flex; justify-content: center; padding: 50px; background: transparent;
+    font-family: 'Montserrat', sans-serif;
+}
+.crud-card {
+    background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%; max-width: 700px; padding: 40px; border: 1px solid #e0e0e0;
+}
+.title {
+    text-align: center; color: #74C15A; font-family: 'Poppins', sans-serif; margin-bottom: 25px;
+}
+form { display: flex; flex-direction: column; gap: 15px; }
+form label { font-weight: 600; color: #333; }
+form input, form textarea, form select {
+    width: 100%; padding: 10px; border: 1px solid #74C15A; border-radius: 8px; font-family: 'Montserrat', sans-serif;
+}
+.actions { text-align: center; margin-top: 25px; }
+.btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; }
+.btn-back { border: 2px solid #74C15A; color: #74C15A; }
+.btn-back:hover { background-color: #74C15A; color: white; }
+button[type="submit"] {
+    background-color: #74C15A; color: white; border: none; padding: 10px 20px; border-radius: 8px;
+    font-weight: 600; transition: 0.3s;
+}
+button[type="submit"]:hover { background-color: #5ca74b; }
+</style>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Travel NegOr{% endblock %}
+
+{% block body %}
+<section id="home" class="hero">
+  <div class="hero-content">
+    <h2>Discover Negros Oriental</h2>
+    <p>Connecting you to authentic adventures and unforgettable experiences.</p>
+    <a href="{{ path('login') }}" class="btn">Sign Up / Log In</a>
+
+  </div>
+</section>
+
+<section id="about" class="section about">
+  <h2>About Us</h2>
+  <p class="intro">
+    <strong>Travel NegOr</strong> is your trusted travel and tourism companion in Negros Oriental — 
+    a one-stop system designed to make your travel planning seamless, informative, and exciting. 
+    Our goal is to promote the province’s natural beauty, rich culture, and warm hospitality 
+    through technology-driven solutions that connect people to authentic adventures.
+  </p>
+
+  <div class="about-features">
+    <div class="feature">
+      <img src="{{ asset('images/icons/booking.png') }}" alt="Booking Services">
+      <h3>Smart Booking System</h3>
+      <p>Book local destinations, accommodations, and tour packages in just a few clicks. 
+      Our system simplifies reservations and ensures smooth coordination with travel operators.</p>
+    </div>
+
+    <div class="feature">
+      <img src="{{ asset('images/icons/info.png') }}" alt="Travel Information">
+      <h3>Tourism Information Hub</h3>
+      <p>Explore detailed information about Negros Oriental’s top attractions, festivals, 
+      local food, and travel guides — all verified and regularly updated.</p>
+    </div>
+
+    <div class="feature">
+      <img src="{{ asset('images/icons/community.png') }}" alt="Community Support">
+      <h3>Traveler Community</h3>
+      <p>Connect with fellow travelers, share experiences, and get real-time recommendations 
+      from locals and guides through our built-in feedback and review system.</p>
+    </div>
+
+    <div class="feature">
+      <img src="{{ asset('images/icons/support.png') }}" alt="Customer Support">
+      <h3>24/7 Customer Assistance</h3>
+      <p>Our support team is ready to assist you anytime — from trip planning to post-travel feedback, 
+      ensuring a hassle-free experience wherever you go.</p>
+    </div>
+  </div>
+</section>
+
+
+<section id="destinations" class="section">
+  <h2>Top Destinations</h2>
+  <div class="destination-list">
+    <div class="destination-card">
+      <img src="{{ asset('images/destinations/apo.jpg') }}" alt="Apo Island">
+      <h3>Apo Island</h3>
+      <p>World-renowned diving spot with rich marine life.</p>
+    </div>
+
+    <div class="destination-card">
+      <img src="{{ asset('images/destinations/lakeb.jpg') }}" alt="Lake Balinsasayao">
+      <h3>Lake Balinsasayao</h3>
+      <p>Tranquil twin lakes surrounded by lush forest.</p>
+    </div>
+
+    <div class="destination-card">
+      <img src="{{ asset('images/destinations/majuyod.jpg') }}" alt="Manjuyod Sandbar">
+      <h3>Manjuyod Sandbar</h3>
+      <p>The Maldives of Negros Oriental — white sand and clear waters.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <h2>Contact Us</h2>
+  <p>We’d love to hear from you!</p>
+  <ul>
+    <li>Email: info@travelnegor.com</li>
+    <li>Phone: +63 912 345 6789</li>
+  </ul>
+</section>
+{% endblock %}

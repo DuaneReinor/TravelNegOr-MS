@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel — Travel NegOr{% endblock %}</title>
+
+    <link rel="icon" href="{{ asset('images/travelnegor.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Montserrat&display=swap" rel="stylesheet">
+
+    {# ✅ Admin-specific CSS file #}
+    {% block stylesheets %}
+      <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    {% endblock %}
+  </head>
+
+<body>
+  <header class="admin-header">
+    <div class="admin-topbar">
+      <h1 class="admin-logo">Travel NegOr <span>Admin</span></h1>
+      {% if app.user %}
+        <div class="admin-user">
+          👋 Welcome, {{ app.user.firstName|capitalize }}
+          <a href="{{ path('app_logout') }}" class="logout-btn">Logout</a>
+        </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <ul>
+        <li><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+        <li><a href="#">Hotels</a></li>
+        <li><a href="#">Destinations</a></li>
+      <li><a href="{{ path('admin_users_index') }}">Users</a></li>
+
+      </ul>
+    </aside>
+
+    <main class="admin-content">
+      {% block admin_content%}{% endblock %}
+    </main>
+  </div>
+
+{% block javascripts %}
+    
+{% endblock %}
+
+  
+</body>
+</html>

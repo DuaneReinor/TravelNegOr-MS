@@ -1,0 +1,12 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Edit User{% endblock %}
+
+{% block admin_content %}
+<div class="crud-container">
+    <div class="crud-card">
+        <h1 class="title">Edit User</h1>
+        {{ include('admin/users/_form.html.twig', {'button_label': 'Update'}) }}
+        <a href="{{ path('admin_users_index') }}" class="btn btn-back">Back to list</a>
+    </div>
+</div>
+{% endblock %}

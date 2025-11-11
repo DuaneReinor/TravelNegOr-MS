@@ -1,0 +1,149 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Edit Hotel{% endblock %}
+
+{% block admin_content %}
+<div class="crud-container">
+    <div class="crud-card">
+        <h1 class="title">Edit Hotel</h1>
+
+        {% if hotel.image %}
+            <div class="preview">
+                <img src="{{ asset('uploads/images/' ~ hotel.image) }}" alt="{{ hotel.name }}" class="preview-img">
+            </div>
+        {% endif %}
+
+        {{ include('admin/hotels/_form.html.twig', {'button_label': 'Update'}) }}
+
+        <div class="actions">
+            <a href="{{ path('admin_hotels_index') }}" class="btn small btn-back">Back</a>
+            <button type="submit" form="hotel_form" class="btn small btn-save">Update</button>
+            {{ include('admin/hotels/_delete_form.html.twig') }}
+        </div>
+    </div>
+</div>
+
+<style>
+/* ===== Container Layout ===== */
+.crud-container {
+    display: flex;
+    justify-content: center;
+    padding: 50px;
+    background: transparent;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.crud-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 700px;
+    padding: 40px;
+    border: 1px solid #e0e0e0;
+}
+
+/* ===== Title ===== */
+.title {
+    text-align: center;
+    color: #74C15A;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 25px;
+}
+
+/* ===== Image Preview ===== */
+.preview {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.preview-img {
+    width: 200px;
+    height: 150px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid #74C15A;
+}
+
+/* ===== Form ===== */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+form input, 
+form textarea, 
+form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #74C15A;
+    border-radius: 8px;
+}
+
+/* ===== Action Buttons ===== */
+.actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.actions form {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- Button Base ---- */
+.btn {
+    display: inline-block;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 6px 14px; /* smaller buttons */
+    font-size: 0.9rem;
+}
+
+/* ---- Back Button ---- */
+.btn-back {
+    border: 2px solid #74C15A;
+    color: #74C15A;
+    background: white;
+}
+.btn-back:hover {
+    background-color: #74C15A;
+    color: white;
+}
+
+/* ---- Save/Update Button ---- */
+.btn-save {
+    background-color: #74C15A;
+    color: white;
+    border: none;
+}
+.btn-save:hover {
+    background-color: #5ca74b;
+}
+
+/* ---- Delete Button ---- */
+form button.btn-delete {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+form button.btn-delete:hover {
+    background-color: #bb2d3b;
+}
+</style>
+{% endblock %}
