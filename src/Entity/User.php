@@ -48,14 +48,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Hotel::class, inversedBy: 'bookedUsers')]
     private Collection $bookedHotels;
 
-    #[ORM\ManyToMany(targetEntity: Destination::class, inversedBy: 'favoritedByUsers')]
-    private Collection $favoriteDestinations;
 
     // ─── Constructor ─────────────────────────────────────────────
     public function __construct()
     {
         $this->bookedHotels = new ArrayCollection();
-        $this->favoriteDestinations = new ArrayCollection();
+        
     }
 
     // ─── Basic Getters and Setters ───────────────────────────────
@@ -106,7 +104,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = 'ROLE_USER';
+        if (!in_array('ROLE_ADMIN', $roles) && !in_array('ROLE_STAFF', $roles)) {
+    $roles[] = 'ROLE_USER';
+}
+
         return array_unique($roles);
     }
 
@@ -162,23 +163,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     // ─── Favorite Destinations ──────────────────────────────────
-    public function getFavoriteDestinations(): Collection
-    {
-        return $this->favoriteDestinations;
-    }
+    
 
-    public function addFavoriteDestination(Destination $destination): static
-    {
-        if (!$this->favoriteDestinations->contains($destination)) {
-            $this->favoriteDestinations->add($destination);
-        }
-
-        return $this;
-    }
-
-    public function removeFavoriteDestination(Destination $destination): static
-    {
-        $this->favoriteDestinations->removeElement($destination);
-        return $this;
-    }
 }

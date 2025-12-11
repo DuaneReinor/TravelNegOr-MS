@@ -8,7 +8,6 @@
     <link rel="icon" href="{{ asset('images/travelnegor.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Montserrat&display=swap" rel="stylesheet">
 
-    {# ✅ Admin-specific CSS file #}
     {% block stylesheets %}
       <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     {% endblock %}
@@ -31,22 +30,21 @@
     <aside class="admin-sidebar">
       <ul>
         <li><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
-        <li><a href="#">Hotels</a></li>
-        <li><a href="#">Destinations</a></li>
-      <li><a href="{{ path('admin_users_index') }}">Users</a></li>
-
+        {% if is_granted('ROLE_ADMIN') %}
+          <li><a href="{{ path('admin_hotels_index') }}">Hotels</a></li>
+          <li><a href="{{ path('admin_users_index') }}">Users</a></li>
+        {% else %}
+          <li><a href="{{ path('admin_users_index') }}">Users</a></li>
+        {% endif %}
       </ul>
     </aside>
 
     <main class="admin-content">
-      {% block admin_content%}{% endblock %}
+      {% block admin_content %}{% endblock %}
     </main>
   </div>
 
-{% block javascripts %}
-    
-{% endblock %}
-
-  
+  {% block javascripts %}
+  {% endblock %}
 </body>
 </html>

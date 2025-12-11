@@ -7,6 +7,7 @@ use App\Entity\Hotel;
 use App\Entity\Destination;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -17,6 +18,8 @@ class UserType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $isEdit = $options['is_edit'] ?? false;
+
         $builder
             ->add('firstName', TextType::class, [
                 'label' => 'First Name',
@@ -25,25 +28,36 @@ class UserType extends AbstractType
                 'label' => 'Last Name',
             ])
             ->add('email', EmailType::class)
-            ->add('password', PasswordType::class, [
-                'required' => false,
-                'label' => 'Password (leave blank to keep existing)',
+
+            // ─── ROLE SELECTION ─────────────────────────
+            ->add('roles', ChoiceType::class, [
+                'choices' => [
+                    'Admin' => 'ROLE_ADMIN',
+                    'Staff' => 'ROLE_STAFF',
+                ],
+                'expanded' => true,   // checkboxes
+                'multiple' => true,
+                'label' => 'Account Role',
             ])
+
+            // ─── PASSWORD ─────────────────────────────
+            ->add('password', PasswordType::class, [
+                'required' => !$isEdit,
+                'label' => $isEdit
+                    ? 'Password (leave blank to keep existing)'
+                    : 'Password',
+                'empty_data' => '',
+                'mapped' => true,
+            ])
+
+            // ─── OPTIONAL RELATIONS (keep as is) ───────
             ->add('bookedHotels', EntityType::class, [
                 'class' => Hotel::class,
                 'choice_label' => 'name',
                 'multiple' => true,
-                'expanded' => true, // checkboxes
+                'expanded' => true,
                 'required' => false,
                 'label' => 'Booked Hotels',
-            ])
-            ->add('favoriteDestinations', EntityType::class, [
-                'class' => Destination::class,
-                'choice_label' => 'name',
-                'multiple' => true,
-                'expanded' => true, // checkboxes
-                'required' => false,
-                'label' => 'Favorite Destinations',
             ]);
     }
 
@@ -51,6 +65,7 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'is_edit' => false,
         ]);
     }
 }

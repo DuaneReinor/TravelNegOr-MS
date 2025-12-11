@@ -8,7 +8,7 @@
         <div class="header-section">
             <h1>User Management</h1>
             <div class="header-controls">
-
+3
                 <div id="search-container"></div>
             </div>
         </div>
@@ -20,8 +20,7 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Booked Hotels</th>
-                        <th>Favorite Destinations</th>
+                        <th>Role</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -31,8 +30,7 @@
                             <td>{{ user.id }}</td>
                             <td>{{ user.firstName }} {{ user.lastName }}</td>
                             <td>{{ user.email }}</td>
-                            <td>{{ user.bookedHotels|length }}</td>
-                            <td>{{ user.favoriteDestinations|length }}</td>
+                            <td>{{ user.roles|join(', ') }}</td>
                             <td class="actions">
                                 <a href="{{ path('admin_users_show', {'id': user.id}) }}" class="btn-action view">View</a>
                                 <a href="{{ path('admin_users_edit', {'id': user.id}) }}" class="btn-action edit">Edit</a>

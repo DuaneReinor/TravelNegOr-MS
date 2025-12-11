@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\DestinationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
 
 #[ORM\Entity(repositoryClass: DestinationRepository::class)]
 class Destination
@@ -26,6 +27,11 @@ class Destination
     #[ORM\Column(length: 255)]
     private ?string $image = null;
 
+    // 🔥 NEW FIELD: who created this destination
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdBy = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -39,7 +45,6 @@ class Destination
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -51,7 +56,6 @@ class Destination
     public function setLocation(string $location): static
     {
         $this->location = $location;
-
         return $this;
     }
 
@@ -63,7 +67,6 @@ class Destination
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -75,7 +78,19 @@ class Destination
     public function setImage(string $image): static
     {
         $this->image = $image;
+        return $this;
+    }
 
+    // 🔥 GETTER/SETTER for createdBy
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(User $user): self
+    {
+        $this->createdBy = $user;
         return $this;
     }
 }
