@@ -50,15 +50,8 @@ class UserType extends AbstractType
                 'mapped' => true,
             ])
 
-            // ─── OPTIONAL RELATIONS (keep as is) ───────
-            ->add('bookedHotels', EntityType::class, [
-                'class' => Hotel::class,
-                'choice_label' => 'name',
-                'multiple' => true,
-                'expanded' => true,
-                'required' => false,
-                'label' => 'Booked Hotels',
-            ]);
+            // ─── BOOKED HOTELS RELATION REMOVED TO FIX DOCTRINE MAPPING ISSUES ───
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -8,15 +8,10 @@
 
         <p><strong>Email:</strong> {{ user.email }}</p>
 
-        <h2>Booked Hotels</h2>
-        <ul>
-            {% for hotel in user.bookedHotels %}
-                <li>{{ hotel.name }}</li>
-            {% else %}
-                <li>No booked hotels.</li>
-            {% endfor %}
-        </ul>
-
+        <!-- Booked Hotels section removed to fix Doctrine mapping issues -->
+        
+        <!-- Favorite Destinations section - checking if property exists -->
+        {% if user.favoriteDestinations is defined %}
         <h2>Favorite Destinations</h2>
         <ul>
             {% for dest in user.favoriteDestinations %}
@@ -25,9 +20,10 @@
                 <li>No favorite destinations.</li>
             {% endfor %}
         </ul>
+        {% endif %}
 
-        <a href="{{ path('admin_user_edit', {'id': user.id}) }}" class="btn btn-edit">Edit</a>
-        <a href="{{ path('admin_user_index') }}" class="btn btn-back">Back</a>
+        <a href="{{ path('admin_users_edit', {'id': user.id}) }}" class="btn btn-edit">Edit</a>
+        <a href="{{ path('admin_users_index') }}" class="btn btn-back">Back</a>
         {{ include('admin/users/_delete_form.html.twig') }}
     </div>
 </div>

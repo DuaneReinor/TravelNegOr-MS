@@ -1,0 +1,152 @@
+{% extends 'staff/base.html.twig' %}
+
+{% block title %}Destination Management{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css">
+{% endblock %}
+
+{% block staff_content %}
+<div class="hotel-container">
+    <div class="card">
+        <div class="header-section">
+            <h1>Destination Management</h1>
+            <div class="header-controls">
+                <a href="{{ path('staff_destinations_new') }}" class="btn-add">+ Add Destination</a>
+                <div id="search-container"></div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="destinationTable" class="hotel-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Description</th>
+                        <th>Created By</th>
+                        <th>Image</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+{% for destination in destinations %}
+  <tr>
+    <td>{{ destination.id }}</td>
+    <td>{{ destination.name }}</td>
+    <td>{{ destination.location }}</td>
+    <td>{{ destination.description|length > 30 ? destination.description|slice(0, 30) ~ '...' : destination.description }}</td>
+    <td>
+      {% if destination.createdBy %}
+        {{ destination.createdBy.firstName }} {{ destination.createdBy.lastName }}
+        {% if destination.createdBy == app.user %}
+          <span class="creator-badge">(You)</span>
+        {% endif %}
+      {% else %}
+        <em>Unknown</em>
+      {% endif %}
+    </td>
+    <td>
+      {% if destination.image %}
+        <img src="{{ asset('uploads/' ~ destination.image) }}" alt="{{ destination.name }}" class="hotel-thumb">
+      {% else %}
+        <em>No image</em>
+      {% endif %}
+    </td>
+    <td class="actions">
+      <a href="{{ path('staff_destinations_show', {'id': destination.id}) }}" class="btn-action view">View</a>
+      <a href="{{ path('staff_destinations_edit', {'id': destination.id}) }}" class="btn-action edit">Edit</a>
+      {{ include('staff/destinations/_delete_form.html.twig', {'id': destination.id}) }}
+    </td>
+  </tr>
+{% else %}
+  <tr class="no-data">
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>No destinations found.</td>
+  </tr>
+{% endfor %}
+</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+{% if destinations|length > 0 %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        new DataTable('#destinationTable', {
+            pageLength: 10,
+            searchable: true,
+            fixedHeight: true,
+            language: {
+                searchPlaceholder: "Search destinations...",
+                lengthMenu: "Show _MENU_ entries per page"
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+<style>
+/* same styles as hotels */
+#search-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.dataTables_filter { display: flex; align-items: center; margin: 0 !important; }
+.dataTables_filter input {
+    border-radius: 8px; border: 1px solid #ccc; padding: 6px 10px; width: 200px;
+    transition: 0.3s;
+}
+.dataTables_filter input:focus {
+    border-color: #74C15A; box-shadow: 0 0 5px rgba(116,193,90,0.3); outline: none;
+}
+
+.hotel-container { padding: 40px; background: transparent; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; }
+.card {
+    background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%; max-width: 1100px; padding: 30px; border: 1px solid #e0e0e0;
+}
+.header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+.header-section h1 { font-family: 'Poppins', sans-serif; color: #333; font-size: 28px; margin: 0; }
+
+.btn-add {
+    background-color: #74C15A; color: #fff; padding: 10px 20px;
+    border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s;
+}
+.btn-add:hover { background-color: #5ca74b; }
+
+.hotel-table {
+    width: 100%; border-collapse: collapse; text-align: center;
+    border-radius: 8px; overflow: hidden; background-color: #ffffff;
+}
+.hotel-table th, .hotel-table td { padding: 12px 15px; border-bottom: 1px solid #ddd; vertical-align: middle; }
+.hotel-table th { background-color: #74C15A; color: white; font-weight: 600; }
+
+.hotel-thumb { width: 60px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
+.actions { display: flex; justify-content: center; gap: 6px; }
+
+.btn-action { padding: 6px 10px; border-radius: 6px; text-decoration: none; color: white; font-size: 13px; font-weight: 600; transition: 0.3s; }
+.btn-action.view { background-color: #6c757d; }
+.btn-action.edit { background-color: #007bff; }
+button.btn-action.delete { background-color: #dc3545; color: white; border: none; cursor: pointer; }
+button.btn-action.delete:hover { background-color: #bb2d3b; }
+
+.creator-badge {
+    background-color: #74C15A;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 5px;
+}
+</style>
+{% endblock %}

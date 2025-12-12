@@ -1,0 +1,155 @@
+{% extends 'staff/base.html.twig' %}
+
+{% block title %}{{ destination.name }}{% endblock %}
+
+{% block staff_content %}
+<div class="admin-section">
+    <div class="page-header">
+        <h1>{{ destination.name }}</h1>
+        <div class="header-actions">
+            <a href="{{ path('admin_destinations_edit', {id: destination.id}) }}" class="btn-edit">Edit Destination</a>
+            <a href="{{ path('admin_destinations_index') }}" class="btn-view">← Back to Destinations</a>
+        </div>
+    </div>
+
+    <div class="destination-details">
+        <div class="detail-card">
+            <div class="detail-section">
+                <h3>Location</h3>
+                <p>{{ destination.location }}</p>
+            </div>
+
+            <div class="detail-section">
+                <h3>Description</h3>
+                <p>{{ destination.description }}</p>
+            </div>
+
+            {% if destination.image %}
+            <div class="detail-section">
+                <h3>Image</h3>
+                <img src="{{ destination.image }}" alt="{{ destination.name }}" class="destination-image">
+            </div>
+            {% endif %}
+
+            <div class="detail-section">
+                <h3>Created By</h3>
+                <p>{{ destination.createdBy.firstName }} {{ destination.createdBy.lastName }}</p>
+            </div>
+
+            <div class="detail-section">
+                <h3>Created At</h3>
+                <p>{{ destination.id ? destination.id|date('Y-m-d H:i:s') : 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-section {
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.destination-details {
+    max-width: 800px;
+}
+
+.detail-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.detail-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.detail-section h3 {
+    color: #74C15A;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.detail-section p {
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.destination-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.btn-edit {
+    background: #007bff;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.3s;
+}
+
+.btn-edit:hover {
+    opacity: 0.85;
+}
+
+.btn-view {
+    background: #6c757d;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.3s;
+}
+
+.btn-view:hover {
+    opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+</style>
+{% endblock %}

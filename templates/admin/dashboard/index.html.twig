@@ -1,5 +1,5 @@
 {% extends 'admin/base.html.twig' %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block admin_content %}
 <div class="dashboard-container">
@@ -14,9 +14,24 @@
                 <p>{{ adminCount }}</p>
             </div>
 
+            <div class="stat-box staff">
+                <h2>Staff</h2>
+                <p>{{ staffCount }}</p>
+            </div>
+
             <div class="stat-box client">
                 <h2>Clients / Customers</h2>
                 <p>{{ clientCount }}</p>
+            </div>
+
+            <div class="stat-box hotel">
+                <h2>Hotels</h2>
+                <p>{{ totalHotels }}</p>
+            </div>
+
+            <div class="stat-box destination">
+                <h2>Destinations</h2>
+                <p>{{ totalDestinations }}</p>
             </div>
         </div>
     </div>
@@ -43,7 +58,7 @@
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     width: 100%;
-    max-width: 900px;
+    max-width: 1200px;
     padding: 30px;
 }
 
@@ -64,15 +79,15 @@
 .stats-container {
     display: flex;
     justify-content: space-around;
-    gap: 30px;
+    gap: 20px;
     flex-wrap: wrap;
 }
 
 .stat-box {
     color: white;
     border-radius: 12px;
-    padding: 30px;
-    width: 300px;
+    padding: 25px;
+    width: 200px;
     text-align: center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -80,12 +95,12 @@
 
 .stat-box h2 {
     margin-bottom: 10px;
-    font-size: 22px;
+    font-size: 18px;
     font-family: 'Poppins', sans-serif;
 }
 
 .stat-box p {
-    font-size: 36px;
+    font-size: 32px;
     font-weight: bold;
     margin: 0;
 }
@@ -94,8 +109,20 @@
     background-color: #007bff;
 }
 
+.stat-box.staff {
+    background-color: #17a2b8;
+}
+
 .stat-box.client {
     background-color: #74C15A;
+}
+
+.stat-box.hotel {
+    background-color: #fd7e14;
+}
+
+.stat-box.destination {
+    background-color: #6f42c1;
 }
 
 .stat-box:hover {

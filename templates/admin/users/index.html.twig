@@ -2,25 +2,34 @@
 
 {% block title %}User Management{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {# ✅ DataTables v2 CSS CDN #}
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css">
+{% endblock %}
+
+
 {% block admin_content %}
 <div class="hotel-container">
     <div class="card">
         <div class="header-section">
-            <h1>User Management</h1>
-            <div class="header-controls">
-3
-                <div id="search-container"></div>
-            </div>
+        <h1>User Management</h1>
+        <div class="header-controls">
+            <a href="{{ path('admin_users_new') }}" class="btn-add">+ Add User</a>
+            <div id="search-container"></div>
+        </div>
         </div>
 
+
         <div class="table-wrapper">
-            <table id="userTable" class="hotel-table">
+            <table id="hotelTable"  class="hotel-table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -30,29 +39,48 @@
                             <td>{{ user.id }}</td>
                             <td>{{ user.firstName }} {{ user.lastName }}</td>
                             <td>{{ user.email }}</td>
-                            <td>{{ user.roles|join(', ') }}</td>
+                            <td>
+                                {% for role in user.roles %}
+                                    <span class="role-badge">{{ role|replace({'ROLE_': '', '_': ' '})|title }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <span class="status-badge active">Active</span>
+                            </td>
                             <td class="actions">
                                 <a href="{{ path('admin_users_show', {'id': user.id}) }}" class="btn-action view">View</a>
                                 <a href="{{ path('admin_users_edit', {'id': user.id}) }}" class="btn-action edit">Edit</a>
-                                {{ include('admin/users/_delete_form.html.twig', {'user': user}) }}
+                                {{ include('admin/users/_delete_form.html.twig') }}
                             </td>
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="6" class="no-data">No users found.</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="no-data">No users found.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+   
+        
+            </div>
         </div>
     </div>
-</div>
 
-{% block javascripts %}
+ {% block javascripts %}
+
+
+
+    
     <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            new DataTable('#userTable', {
+            new DataTable('#hotelTable', {
                 pageLength: 10,
                 searchable: true,
                 fixedHeight: true,
@@ -65,8 +93,10 @@
     </script>
 {% endblock %}
 
-<style>
-#search-container {
+
+    <style>
+
+   #search-container {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -91,6 +121,7 @@
     padding: 6px 10px;
     width: 200px;
     transition: 0.3s;
+    
 }
 
 .dataTables_filter input:focus {
@@ -99,148 +130,178 @@
     outline: none;
 }
 
-.header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
 
-.header-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
+    .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
 
-/* Container Setup */
-.hotel-container {
-    padding: 40px;
-    background: transparent;
-    font-family: 'Montserrat', sans-serif;
-    display: flex;
-    justify-content: center;
-}
+ 
 
-/* Card wrapper */
-.card {
-    background: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 1100px;
-    padding: 30px;
-    border: 1px solid #e0e0e0;
-}
 
-/* Header Section */
-.header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-}
+    /* Container Setup */
+    .hotel-container {
+        padding: 40px;
+        background: transparent; /* allow your page background image to show */
+        font-family: 'Montserrat', sans-serif;
+        display: flex;
+        justify-content: center;
+    }
 
-.header-section h1 {
-    font-family: 'Poppins', sans-serif;
-    color: #333;
-    font-size: 28px;
-    margin: 0;
-}
+    /* Card wrapper - this stays white even with background image */
+    .card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 1100px;
+        padding: 30px;
+        border: 1px solid #e0e0e0;
+    }
 
-.btn-add {
-    background-color: #74C15A;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: 0.3s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.btn-add:hover {
-    background-color: #5ca74b;
-}
+    /* Header Section */
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
 
-/* Table Wrapper */
-.table-wrapper {
-    overflow-x: auto;
-}
+    .header-section h1 {
+        font-family: 'Poppins', sans-serif;
+        color: #333;
+        font-size: 28px;
+        margin: 0;
+    }
 
-/* Table Styling */
-.hotel-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: center;
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #ffffff;
-}
+    .btn-add {
+        background-color: #74C15A;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .btn-add:hover {
+        background-color: #5ca74b;
+    }
 
-.hotel-table th, .hotel-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
-    vertical-align: middle;
-}
+    /* Table Wrapper */
+    .table-wrapper {
+        overflow-x: auto;
+    }
 
-.hotel-table th {
-    background-color: #74C15A;
-    color: white;
-    font-weight: 600;
-}
+    /* Table Styling */
+    .hotel-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #ffffff;
+    }
 
-.hotel-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
+    .hotel-table th, .hotel-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: middle;
+    }
 
-.hotel-table tr:hover {
-    background-color: #f2fdf3;
-}
+    .hotel-table th {
+        background-color: #74C15A;
+        color: white;
+        font-weight: 600;
+    }
 
-/* Action Buttons */
-.actions {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-}
+    .hotel-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
 
-.btn-action {
-    padding: 6px 10px;
-    border-radius: 6px;
-    text-decoration: none;
-    color: white;
-    font-size: 13px;
-    font-weight: 600;
-    transition: 0.3s;
-}
+    .hotel-table tr:hover {
+        background-color: #f2fdf3;
+    }
 
-.btn-action.view {
-    background-color: #6c757d;
-}
-.btn-action.edit {
-    background-color: #007bff;
-}
-.btn-action.delete,
-button.btn-action.delete {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-.btn-action.delete:hover,
-button.btn-action.delete:hover {
-    background-color: #bb2d3b;
-    color: white;
-}
+    /* Role and Status Badges */
+    .role-badge {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        margin: 2px;
+    }
 
-.btn-action:hover {
-    opacity: 0.85;
-}
+    .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
 
-.no-data {
-    text-align: center;
-    color: #888;
-    padding: 20px 0;
-}
-</style>
-{% endblock %}
+    .status-badge.active {
+        background-color: #28a745;
+        color: white;
+    }
+
+    /* Action Buttons */
+    .actions {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-action {
+        padding: 6px 10px;
+        border-radius: 6px;
+        text-decoration: none;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-action.view {
+        background-color: #6c757d;
+    }
+    .btn-action.edit {
+        background-color: #007bff;
+    }
+    /* Make delete button red */
+    .btn-action.delete,
+    button.btn-action.delete {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-action.delete:hover,
+    button.btn-action.delete:hover {
+        background-color: #bb2d3b;
+        color: white;
+    }
+
+    .btn-action:hover {
+        opacity: 0.85;
+    }
+
+    .no-data {
+        text-align: center;
+        color: #888;
+        padding: 20px 0;
+    }
+    </style>
+    {% endblock %}

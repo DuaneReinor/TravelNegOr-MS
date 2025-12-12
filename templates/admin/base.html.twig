@@ -18,7 +18,7 @@
   <div class="admin-left-group">
     <div class="admin-title">
       <span class="admin-logo">Travel <strong>NegOr</strong></span>
-      <span class="admin-subtitle">Admin Panel</span>
+      <span class="admin-subtitle">{{ is_granted('ROLE_ADMIN') ? 'Admin Panel' : 'Staff Panel' }}</span>
     </div>
   </div>
 
@@ -35,9 +35,18 @@
      
       <ul>
         <li><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
-        <li><a href="{{ path('admin_hotels') }}">Hotels</a></li>
-        <li><a href="{{ path('admin_destinations') }}">Destinations</a></li>
-        <li><a href="{{ path('admin_users') }}">Users</a></li>
+        
+        {% if is_granted('ROLE_ADMIN') %}
+          <li><a href="{{ path('admin_hotels') }}">Hotels</a></li>
+          <li><a href="{{ path('admin_users') }}">Users</a></li>
+        {% endif %}
+        
+        {% if is_granted('ROLE_ADMIN') %}
+          <li><a href="{{ path('admin_destinations_index') }}">Destinations</a></li>
+          <li><a href="{{ path('admin_activity_logs_index') }}">Activity Logs</a></li>
+        {% else %}
+          <li><a href="{{ path('staff_destinations_index') }}">Destinations</a></li>
+        {% endif %}
        
       </ul>
     </aside>

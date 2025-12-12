@@ -1,12 +1,22 @@
 {% extends 'admin/base.html.twig' %}
+
 {% block title %}Create New User{% endblock %}
 
 {% block admin_content %}
-<div class="crud-container">
-    <div class="crud-card">
-        <h1 class="title">Create New User</h1>
-        {{ include('admin/users/_form.html.twig', {'button_label': 'Create'}) }}
-        <a href="{{ path('admin_user_index') }}" class="btn btn-back">Back to list</a>
-    </div>
+<div class="form-page-container">
+    {{ include('admin/shared/_form.html.twig', {
+        'form': form,
+        'button_label': 'Create User'
+    }) }}
 </div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.form-page-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 2rem 1rem;
+}
+</style>
 {% endblock %}

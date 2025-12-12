@@ -32,6 +32,14 @@ class Destination
     #[ORM\JoinColumn(nullable: true)]
     private ?User $createdBy = null;
 
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +99,19 @@ class Destination
     public function setCreatedBy(User $user): self
     {
         $this->createdBy = $user;
+        return $this;
+    }
+
+    // 🔥 GETTER/SETTER for createdAt
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
         return $this;
     }
 }

@@ -1,0 +1,394 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Activity Logs{% endblock %}
+
+{% block admin_content %}
+<div class="activity-logs-container">
+    <div class="card">
+        <div class="header-section">
+            <h1>Activity Logs</h1>
+            <div class="header-controls">
+                <form method="GET" class="filter-form">
+                    <input type="text" name="search" placeholder="Search logs..." value="{{ search }}">
+                    <select name="action">
+                        <option value="">All Actions</option>
+                        {% for action_option in actions %}
+                            <option value="{{ action_option }}" {% if current_action == action_option %}selected{% endif %}>
+                                {{ action_option }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <select name="entity_type">
+                        <option value="">All Entities</option>
+                        {% for entity_type_option in entity_types %}
+                            <option value="{{ entity_type_option }}" {% if current_entity_type == entity_type_option %}selected{% endif %}>
+                                {{ entity_type_option }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-filter">Filter</button>
+                </form>
+                <form method="POST" action="{{ path('admin_activity_logs_clean') }}" style="display: inline;" 
+                      onsubmit="return confirm('Are you sure you want to clean old activity logs?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('clean_activity_logs') }}">
+                    <input type="number" name="days_to_keep" value="90" min="30" max="365" style="width: 80px;">
+                    <button type="submit" class="btn-clean">Clean Old Logs</button>
+                </form>
+            </div>
+        </div>
+
+        {% if stats|length > 0 %}
+        <div class="stats-section">
+            <h3>Activity Statistics</h3>
+            <div class="stats-grid">
+                {% for stat in stats %}
+                <div class="stat-item">
+                    <span class="stat-action">{{ stat.action }}</span>
+                    <span class="stat-entity">{{ stat.entityType }}</span>
+                    <span class="stat-count">{{ stat.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="table-wrapper">
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in activity_logs %}
+                    <tr class="log-row log-{{ log.action|lower }}">
+                        <td class="timestamp">
+                            {{ log.createdAt|date('M d, Y H:i:s') }}
+                        </td>
+                        <td class="user-info">
+                            {% if log.user %}
+                                <strong>{{ log.user.firstName }} {{ log.user.lastName }}</strong><br>
+                                <small>{{ log.user.email }}</small>
+                            {% else %}
+                                <em>System</em>
+                            {% endif %}
+                        </td>
+                        <td class="action-cell">
+                            <span class="action-badge action-{{ log.action|lower }}">
+                                {{ log.action }}
+                            </span>
+                        </td>
+                        <td class="entity-info">
+                            <strong>{{ log.entityType }}</strong>
+                            {% if log.entityName %}
+                                <br><small>{{ log.entityName }}</small>
+                            {% endif %}
+                            {% if log.entityId %}
+                                <br><small>ID: {{ log.entityId }}</small>
+                            {% endif %}
+                        </td>
+                        <td class="description">
+                            {{ log.description }}
+                        </td>
+                        <td class="ip-info">
+                            {% if log.ipAddress %}
+                                <code>{{ log.ipAddress }}</code>
+                            {% else %}
+                                <em>N/A</em>
+                            {% endif %}
+                        </td>
+                        <td class="actions">
+                            <a href="{{ path('admin_activity_logs_show', {'id': log.id}) }}" class="btn-action view">View</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr class="no-data">
+                        <td colspan="7">No activity logs found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if current_page > 1 %}
+                <a href="{{ path('admin_activity_logs_index', {page: current_page - 1, search: search, action: current_action, entity_type: current_entity_type}) }}" 
+                   class="btn-pagination">Previous</a>
+            {% endif %}
+            
+            <span class="pagination-info">
+                Page {{ current_page }} of {{ total_pages }}
+            </span>
+            
+            {% if current_page < total_pages %}
+                <a href="{{ path('admin_activity_logs_index', {page: current_page + 1, search: search, action: current_action, entity_type: current_entity_type}) }}" 
+                   class="btn-pagination">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.activity-logs-container {
+    padding: 40px;
+    background: transparent;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1400px;
+    padding: 30px;
+    border: 1px solid #e0e0e0;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header-section h1 {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    font-size: 28px;
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-form input, .filter-form select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.btn-filter {
+    background: #74C15A;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-clean {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.stats-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stats-section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.stat-item {
+    background: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.stat-action {
+    background: #007bff;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.stat-entity {
+    background: #6c757d;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.stat-count {
+    font-weight: bold;
+    color: #333;
+}
+
+.activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.activity-table th, .activity-table td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+.activity-table th {
+    background: #74C15A;
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.log-row:hover {
+    background-color: #f9fdf9;
+}
+
+.action-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+.action-create {
+    background: #28a745;
+}
+
+.action-update {
+    background: #007bff;
+}
+
+.action-delete {
+    background: #dc3545;
+}
+
+/* Additional action badge styles for security events */
+.action-login {
+    background: #17a2b8;
+}
+
+.action-logout {
+    background: #6c757d;
+}
+
+.action-login_failed {
+    background: #fd7e14;
+}
+
+.user-info strong {
+    color: #333;
+}
+
+.user-info small {
+    color: #666;
+}
+
+.entity-info strong {
+    color: #333;
+}
+
+.entity-info small {
+    color: #666;
+}
+
+.description {
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+.ip-info code {
+    background: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+.btn-action {
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: white;
+    font-size: 0.8rem;
+    background: #6c757d;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-pagination {
+    padding: 8px 12px;
+    background: #74C15A;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
+.timestamp {
+    white-space: nowrap;
+    font-size: 0.85rem;
+    color: #666;
+}
+</style>
+{% endblock %}

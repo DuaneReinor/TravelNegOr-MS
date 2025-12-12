@@ -2,12 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\ActivityLog;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,6 +19,15 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/admin/users')]
 class UserController extends AbstractController
 {
+    private EntityManagerInterface $entityManager;
+    private RequestStack $requestStack;
+
+    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack)
+    {
+        $this->entityManager = $entityManager;
+        $this->requestStack = $requestStack;
+    }
+
     #[Route('/', name: 'admin_users_index', methods: ['GET'])]
     public function index(UserRepository $userRepository): Response
     {
@@ -46,6 +57,11 @@ class UserController extends AbstractController
 
             $entityManager->persist($user);
             $entityManager->flush();
+
+            // Log the activity
+            $name = $user->getFirstName() . ' ' . $user->getLastName();
+            $this->logActivity('CREATE', 'User', $user->getId(), $name, 
+                "Created user: {$name} ({$user->getEmail()})");
 
             $this->addFlash('success', 'User created successfully.');
             return $this->redirectToRoute('admin_users_index');
@@ -85,6 +101,12 @@ class UserController extends AbstractController
             }
 
             $entityManager->flush();
+
+            // Log the activity
+            $name = $user->getFirstName() . ' ' . $user->getLastName();
+            $this->logActivity('UPDATE', 'User', $user->getId(), $name, 
+                "Updated user: {$name}");
+
             $this->addFlash('success', 'User updated successfully.');
 
             return $this->redirectToRoute('admin_users_index');
@@ -101,11 +123,45 @@ class UserController extends AbstractController
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
+            $name = $user->getFirstName() . ' ' . $user->getLastName();
+            $userId = $user->getId();
+            
             $entityManager->remove($user);
             $entityManager->flush();
+            
+            // Log the activity
+            $this->logActivity('DELETE', 'User', $userId, $name, 
+                "Deleted user: {$name} ({$user->getEmail()})");
+            
             $this->addFlash('success', 'User deleted successfully.');
         }
 
         return $this->redirectToRoute('admin_users_index');
+    }
+
+    /**
+     * Helper method to log activities
+     */
+    private function logActivity(string $action, string $entityType, ?int $entityId, ?string $entityName, string $description): void
+    {
+        $user = $this->getUser();
+        $request = $this->requestStack->getCurrentRequest();
+        
+        $activityLog = ActivityLog::create(
+            action: $action,
+            entityType: $entityType,
+            entityId: $entityId,
+            entityName: $entityName,
+            user: $user,
+            description: $description
+        );
+
+        if ($request) {
+            $activityLog->setIpAddress($request->getClientIp())
+                       ->setUserAgent($request->headers->get('User-Agent'));
+        }
+
+        $this->entityManager->persist($activityLog);
+        $this->entityManager->flush();
     }
 }

@@ -12,7 +12,6 @@ security:
 
   role_hierarchy:
     ROLE_ADMIN: [ROLE_STAFF]    # Admin inherits Staff
-    # NOTE: No ROLE_USER in this app
 
   firewalls:
     dev:
@@ -36,16 +35,21 @@ security:
  
   access_control:
   - { path: ^/login$, roles: PUBLIC_ACCESS }
+  - { path: ^/register$, roles: PUBLIC_ACCESS }
   - { path: ^/assets, roles: PUBLIC_ACCESS }
   - { path: ^/(_profiler|_wdt), roles: PUBLIC_ACCESS }
 
-  # Staff may access /admin/destinations only
-  - { path: ^/admin/destinations, roles: ROLE_STAFF }
-
-  # Admin sections
+  # Allow staff and admin to access destinations (for management)
+  - { path: ^/admin/destinations, roles: [ROLE_STAFF, ROLE_ADMIN] }
+  
+  # Allow staff to access their own destinations and hotels
+  - { path: ^/staff/destinations, roles: ROLE_STAFF }
+  - { path: ^/staff/hotels, roles: ROLE_STAFF }
+  
+  # Allow admin to access other admin areas
   - { path: ^/admin/hotels, roles: ROLE_ADMIN }
   - { path: ^/admin/users, roles: ROLE_ADMIN }
-  - { path: ^/admin/logs, roles: ROLE_ADMIN }
-
-  # FINAL catch-all: Any /admin/* requires ADMIN
-  - { path: ^/admin, roles: ROLE_ADMIN }
+  - { path: ^/admin/dashboard, roles: ROLE_ADMIN }
+  
+  # Allow staff to access staff dashboard
+  - { path: ^/staff, roles: ROLE_STAFF }

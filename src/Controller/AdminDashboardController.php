@@ -8,8 +8,10 @@ use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin', name: 'admin_')]
+#[IsGranted('ROLE_ADMIN')]
 class AdminDashboardController extends AbstractController
 {
     /**
@@ -23,22 +25,20 @@ class AdminDashboardController extends AbstractController
         HotelRepository $hotelRepository,
         DestinationRepository $destinationRepository
     ): Response {
-        // ✅ Restrict access to admins only
-        if (!$this->isGranted('ROLE_ADMIN')) {
-            throw $this->createAccessDeniedException('Access denied. Admins only.');
-        }
-
         // ✅ Fetch all users
         $allUsers = $userRepo->findAll();
 
         // ✅ Initialize counters
         $adminCount = 0;
+        $staffCount = 0;
         $clientCount = 0;
 
         // ✅ Count users by role
         foreach ($allUsers as $user) {
             if (in_array('ROLE_ADMIN', $user->getRoles())) {
                 $adminCount++;
+            } elseif (in_array('ROLE_STAFF', $user->getRoles())) {
+                $staffCount++;
             } else {
                 $clientCount++;
             }
@@ -50,8 +50,9 @@ class AdminDashboardController extends AbstractController
 
         // ✅ Render dashboard with counts
         return $this->render('admin/dashboard/index.html.twig', [
-            'page_title' => 'Admin Dashboard',
+            'page_title' => 'Dashboard',
             'adminCount' => $adminCount,
+            'staffCount' => $staffCount,
             'clientCount' => $clientCount,
             'totalHotels' => $totalHotels,
             'totalDestinations' => $totalDestinations,
@@ -60,12 +61,9 @@ class AdminDashboardController extends AbstractController
 
     
     #[Route('/hotels', name: 'hotels')]
+    #[IsGranted('ROLE_ADMIN')]
     public function hotels(HotelRepository $hotelRepository): Response
     {
-        if (!$this->isGranted('ROLE_ADMIN')) {
-            throw $this->createAccessDeniedException('Access denied. Admins only.');
-        }
-
         $hotels = $hotelRepository->findAll();
 
         return $this->render('admin/hotels/index.html.twig', [
@@ -74,30 +72,13 @@ class AdminDashboardController extends AbstractController
         ]);
     }
 
-    
-    #[Route('/destinations', name: 'destinations')]
-    public function destinations(DestinationRepository $destinationRepository): Response
-    {
-        if (!$this->isGranted('ROLE_ADMIN')) {
-            throw $this->createAccessDeniedException('Access denied. Admins only.');
-        }
 
-        $destinations = $destinationRepository->findAll();
-
-        return $this->render('admin/destinations/index.html.twig', [
-            'page_title' => 'Manage Destinations',
-            'destinations' => $destinations,
-        ]);
-    }
 
    
     #[Route('/users', name: 'users')]
+    #[IsGranted('ROLE_ADMIN')]
     public function users(UserRepository $userRepository): Response
     {
-        if (!$this->isGranted('ROLE_ADMIN')) {
-            throw $this->createAccessDeniedException('Access denied. Admins only.');
-        }
-
         $users = $userRepository->findAll();
 
         return $this->render('admin/users/index.html.twig', [

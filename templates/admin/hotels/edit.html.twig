@@ -3,147 +3,375 @@
 {% block title %}Edit Hotel{% endblock %}
 
 {% block admin_content %}
-<div class="crud-container">
-    <div class="crud-card">
-        <h1 class="title">Edit Hotel</h1>
+<div class="edit-page-container">
+    <div class="edit-header">
+        <div class="edit-breadcrumb">
+            <a href="{{ path('admin_hotels_index') }}" class="breadcrumb-link">
+                <i class="icon-arrow-left"></i>
+                Back to Hotels
+            </a>
+        </div>
+        <div class="edit-title-section">
+            <h1 class="edit-page-title">
+                <i class="icon-building"></i>
+                Edit Hotel
+            </h1>
+            <p class="edit-page-subtitle">Update hotel information and settings</p>
+        </div>
+    </div>
 
-        {% if hotel.image %}
-            <div class="preview">
-                <img src="{{ asset('uploads/images/' ~ hotel.image) }}" alt="{{ hotel.name }}" class="preview-img">
-            </div>
-        {% endif %}
+    <div class="edit-content-wrapper">
+        <div class="edit-main-content">
+            {{ include('admin/shared/_form.html.twig', {
+                'form': form,
+                'button_label': 'Update Hotel'
+            }) }}
+        </div>
+        
+        <div class="edit-sidebar">
 
-        {{ include('admin/hotels/_form.html.twig', {'button_label': 'Update'}) }}
 
-        <div class="actions">
-            <a href="{{ path('admin_hotels_index') }}" class="btn small btn-back">Back</a>
-            <button type="submit" form="hotel_form" class="btn small btn-save">Update</button>
-            {{ include('admin/hotels/_delete_form.html.twig') }}
+
+
+
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block styles %}
 <style>
-/* ===== Container Layout ===== */
-.crud-container {
-    display: flex;
-    justify-content: center;
-    padding: 50px;
-    background: transparent;
-    font-family: 'Montserrat', sans-serif;
+/* ===== CSS VARIABLES ===== */
+:root {
+    /* Colors */
+    --primary-color: #8b5cf6;
+    --primary-light: #a78bfa;
+    --primary-dark: #7c3aed;
+    --secondary-color: #64748b;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #06b6d4;
+    
+    /* Grays */
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    
+    /* Background */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    
+    /* Text */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    /* Borders */
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --border-radius-lg: 16px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    
+    /* Typography */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
 }
 
-.crud-card {
-    background: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 700px;
-    padding: 40px;
-    border: 1px solid #e0e0e0;
+/* ===== BASE STYLES ===== */
+.edit-page-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    padding: var(--space-xl);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* ===== Title ===== */
-.title {
-    text-align: center;
-    color: #74C15A;
-    font-family: 'Poppins', sans-serif;
-    margin-bottom: 25px;
+/* ===== HEADER SECTION ===== */
+.edit-header {
+    margin-bottom: var(--space-2xl);
 }
 
-/* ===== Image Preview ===== */
-.preview {
-    text-align: center;
-    margin-bottom: 20px;
+.edit-breadcrumb {
+    margin-bottom: var(--space-lg);
 }
 
-.preview-img {
-    width: 200px;
-    height: 150px;
-    border-radius: 10px;
-    object-fit: cover;
-    border: 2px solid #74C15A;
-}
-
-/* ===== Form ===== */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-form input, 
-form textarea, 
-form select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #74C15A;
-    border-radius: 8px;
-}
-
-/* ===== Action Buttons ===== */
-.actions {
-    display: flex;
-    justify-content: center;
+.breadcrumb-link {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 30px;
+    gap: var(--space-sm);
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--border-radius-sm);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
 }
 
-.actions form {
-    display: inline-block;
+.breadcrumb-link:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-2px);
+}
+
+.edit-title-section {
+    text-align: center;
+    color: white;
+}
+
+.edit-page-title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    margin: 0 0 var(--space-sm) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+}
+
+.edit-page-subtitle {
+    font-size: var(--font-size-lg);
+    opacity: 0.9;
     margin: 0;
-    padding: 0;
 }
 
-/* ---- Button Base ---- */
+/* ===== CONTENT LAYOUT ===== */
+.edit-content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.edit-main-content {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+}
+
+
+
+
+
+
+
+
+
+/* ===== BUTTON STYLES ===== */
 .btn {
-    display: inline-block;
-    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
     font-weight: 600;
     text-decoration: none;
-    font-family: 'Montserrat', sans-serif;
-    text-align: center;
+    border: none;
+    cursor: pointer;
     transition: all 0.3s ease;
-    cursor: pointer;
-    padding: 6px 14px; /* smaller buttons */
-    font-size: 0.9rem;
+    white-space: nowrap;
 }
 
-/* ---- Back Button ---- */
-.btn-back {
-    border: 2px solid #74C15A;
-    color: #74C15A;
-    background: white;
-}
-.btn-back:hover {
-    background-color: #74C15A;
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
 }
 
-/* ---- Save/Update Button ---- */
-.btn-save {
-    background-color: #74C15A;
-    color: white;
-    border: none;
-}
-.btn-save:hover {
-    background-color: #5ca74b;
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
-/* ---- Delete Button ---- */
-form button.btn-delete {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1200px) {
+    .edit-content-wrapper {
+        grid-template-columns: 1fr;
+        gap: var(--space-xl);
+    }
+    
+    .edit-sidebar {
+        order: -1;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--space-lg);
+    }
 }
-form button.btn-delete:hover {
-    background-color: #bb2d3b;
+
+@media (max-width: 768px) {
+    .edit-page-container {
+        padding: var(--space-md);
+    }
+    
+    .edit-page-title {
+        font-size: var(--font-size-2xl);
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+    
+    .edit-sidebar {
+        grid-template-columns: 1fr;
+    }
+    
+
+    
+    .btn {
+        justify-content: center;
+    }
 }
+
+@media (max-width: 480px) {
+    .edit-page-container {
+        padding: var(--space-sm);
+    }
+    
+    .card-body {
+        padding: var(--space-md);
+    }
+    
+
+    
+
+}
+
+
+
+
+
+/* ===== ICONS ===== */
+[class^="icon-"], [class*=" icon-"] {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+}
+
+.icon-arrow-left::before { content: "\f060"; }
+.icon-building::before { content: "\f1ad"; }
+
+
+.icon-info-circle::before { content: "\f05a"; }
+.icon-hashtag::before { content: "\f292"; }
+.icon-calendar-plus::before { content: "\f271"; }
+.icon-clock::before { content: "\f017"; }
+.icon-toggle-on::before { content: "\f205"; }
+.icon-tag::before { content: "\f02b"; }
+
 </style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Track form changes
+    const form = document.querySelector('.admin-form');
+    if (form) {
+        trackFormChanges(form);
+    }
+});
+
+// ===== FORM TRACKING =====
+function trackFormChanges(form) {
+    const formFields = form.querySelectorAll('.form-control');
+    const originalValues = {};
+    
+    // Store original values
+    formFields.forEach(field => {
+        if (field.type !== 'file') {
+            originalValues[field.name] = field.value;
+        }
+    });
+    
+    // Mark changed fields
+    formFields.forEach(field => {
+        field.addEventListener('input', function() {
+            const fieldGroup = this.closest('.form-group');
+            
+            if (this.value !== originalValues[this.name]) {
+                this.classList.add('changed');
+                if (fieldGroup) fieldGroup.classList.add('field-changed');
+            } else {
+                this.classList.remove('changed');
+                if (fieldGroup) fieldGroup.classList.remove('field-changed');
+            }
+        });
+    });
+    
+    // Form submission enhancement
+    form.addEventListener('submit', function(e) {
+        const changedFields = form.querySelectorAll('.form-control.changed');
+        
+        if (changedFields.length === 0) {
+            e.preventDefault();
+            showNotification('No changes detected. Please modify some fields before submitting.', 'warning');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="icon-spinner fa-spin"></i> Updating...';
+        }
+    });
+}
+
+// ===== NOTIFICATION SYSTEM =====
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="icon-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <i class="icon-times"></i>
+        </button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
 {% endblock %}

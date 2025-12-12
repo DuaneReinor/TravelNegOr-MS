@@ -1,0 +1,301 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Activity Log Details{% endblock %}
+
+{% block admin_content %}
+<div class="activity-log-detail-container">
+    <div class="card">
+        <div class="header-section">
+            <h1>Activity Log Details</h1>
+            <a href="{{ path('admin_activity_logs_index') }}" class="btn-back">← Back to Activity Logs</a>
+        </div>
+
+        <div class="log-detail-content">
+            <div class="log-info-grid">
+                <div class="info-section">
+                    <h3>Basic Information</h3>
+                    <div class="info-item">
+                        <label>ID:</label>
+                        <span>{{ activity_log.id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Action:</label>
+                        <span class="action-badge action-{{ activity_log.action|lower }}">
+                            {{ activity_log.action }}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <label>Entity Type:</label>
+                        <span>{{ activity_log.entityType }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Entity Name:</label>
+                        <span>{{ activity_log.entityName ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Entity ID:</label>
+                        <span>{{ activity_log.entityId ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Timestamp:</label>
+                        <span>{{ activity_log.createdAt|date('F j, Y g:i:s A') }}</span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>User Information</h3>
+                    <div class="info-item">
+                        <label>User:</label>
+                        {% if activity_log.user %}
+                            <span>
+                                <strong>{{ activity_log.user.firstName }} {{ activity_log.user.lastName }}</strong><br>
+                                <small>{{ activity_log.user.email }}</small>
+                            </span>
+                        {% else %}
+                            <span><em>System</em></span>
+                        {% endif %}
+                    </div>
+                    <div class="info-item">
+                        <label>User Email:</label>
+                        <span>{{ activity_log.userEmail ?? 'N/A' }}</span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>Technical Information</h3>
+                    <div class="info-item">
+                        <label>IP Address:</label>
+                        <span>
+                            {% if activity_log.ipAddress %}
+                                <code>{{ activity_log.ipAddress }}</code>
+                            {% else %}
+                                <em>N/A</em>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <label>User Agent:</label>
+                        <span>{{ activity_log.userAgent ?? 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Description</h3>
+                <div class="description-box">
+                    {{ activity_log.description ?? 'No description available' }}
+                </div>
+            </div>
+
+            {% if activity_log.oldData or activity_log.newData %}
+            <div class="info-section">
+                <h3>Data Changes</h3>
+                <div class="data-comparison">
+                    {% if activity_log.oldData %}
+                    <div class="data-column">
+                        <h4>Old Data</h4>
+                        <pre class="data-display">{{ activity_log.oldData|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                    </div>
+                    {% endif %}
+                    
+                    {% if activity_log.newData %}
+                    <div class="data-column">
+                        <h4>New Data</h4>
+                        <pre class="data-display">{{ activity_log.newData|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.activity-log-detail-container {
+    padding: 40px;
+    background: transparent;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1000px;
+    padding: 30px;
+    border: 1px solid #e0e0e0;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.header-section h1 {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    font-size: 28px;
+    margin: 0;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.btn-back:hover {
+    background: #5a6268;
+}
+
+.log-detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.log-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.info-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.info-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+}
+
+.info-item {
+    display: flex;
+    margin-bottom: 12px;
+    align-items: flex-start;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: #555;
+    min-width: 120px;
+    margin-right: 10px;
+}
+
+.info-item span {
+    color: #333;
+    flex: 1;
+}
+
+.action-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+.action-create {
+    background: #28a745;
+}
+
+.action-update {
+    background: #007bff;
+}
+
+.action-delete {
+    background: #dc3545;
+}
+
+/* Additional action badge styles for security events */
+.action-login {
+    background: #17a2b8;
+}
+
+.action-logout {
+    background: #6c757d;
+}
+
+.action-login_failed {
+    background: #fd7e14;
+}
+
+.description-box {
+    background: white;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.data-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.data-column h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.data-display {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+code {
+    background: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .log-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .data-comparison {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+</style>
+{% endblock %}

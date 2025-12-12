@@ -1,0 +1,218 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block admin_content %}
+<div class="activity-logs-container">
+    <div class="card">
+        <div class="header-section">
+            <h1>{{ page_title }}</h1>
+            <a href="{{ path('admin_activity_logs_index') }}" class="btn-back">← Back to All Activity Logs</a>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in activity_logs %}
+                    <tr class="log-row log-{{ log.action|lower }}">
+                        <td class="timestamp">
+                            {{ log.createdAt|date('M d, Y H:i:s') }}
+                        </td>
+                        <td class="user-info">
+                            {% if log.user %}
+                                <strong>{{ log.user.firstName }} {{ log.user.lastName }}</strong><br>
+                                <small>{{ log.user.email }}</small>
+                            {% else %}
+                                <em>System</em>
+                            {% endif %}
+                        </td>
+                        <td class="action-cell">
+                            <span class="action-badge action-{{ log.action|lower }}">
+                                {{ log.action }}
+                            </span>
+                        </td>
+                        <td class="description">
+                            {{ log.description }}
+                        </td>
+                        <td class="ip-info">
+                            {% if log.ipAddress %}
+                                <code>{{ log.ipAddress }}</code>
+                            {% else %}
+                                <em>N/A</em>
+                            {% endif %}
+                        </td>
+                        <td class="actions">
+                            <a href="{{ path('admin_activity_logs_show', {'id': log.id}) }}" class="btn-action view">View</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr class="no-data">
+                        <td colspan="6">No activity logs found for this entity.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.activity-logs-container {
+    padding: 40px;
+    background: transparent;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1200px;
+    padding: 30px;
+    border: 1px solid #e0e0e0;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.header-section h1 {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    font-size: 28px;
+    margin: 0;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.btn-back:hover {
+    background: #5a6268;
+}
+
+.activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.activity-table th, .activity-table td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+.activity-table th {
+    background: #74C15A;
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.log-row:hover {
+    background-color: #f9fdf9;
+}
+
+.action-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+.action-create {
+    background: #28a745;
+}
+
+.action-update {
+    background: #007bff;
+}
+
+.action-delete {
+    background: #dc3545;
+}
+
+/* Additional action badge styles for security events */
+.action-login {
+    background: #17a2b8;
+}
+
+.action-logout {
+    background: #6c757d;
+}
+
+.action-login_failed {
+    background: #fd7e14;
+}
+
+.user-info strong {
+    color: #333;
+}
+
+.user-info small {
+    color: #666;
+}
+
+.description {
+    max-width: 400px;
+    word-wrap: break-word;
+}
+
+.ip-info code {
+    background: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+.btn-action {
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: white;
+    font-size: 0.8rem;
+    background: #6c757d;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
+.timestamp {
+    white-space: nowrap;
+    font-size: 0.85rem;
+    color: #666;
+}
+</style>
+{% endblock %}

@@ -15,7 +15,6 @@ class DestinationType extends AbstractType
             ->add('name')
             ->add('location')
             ->add('description')
-            ->add('image')
         ;
     }
 

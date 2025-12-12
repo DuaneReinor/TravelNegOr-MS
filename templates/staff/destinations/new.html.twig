@@ -1,0 +1,164 @@
+{% extends 'staff/base.html.twig' %}
+
+{% block title %}Create Destination{% endblock %}
+
+{% block staff_content %}
+<div class="admin-section">
+    <div class="page-header">
+        <h1>Create New Destination</h1>
+        <a href="{{ path('admin_destinations_index') }}" class="btn-view">← Back to Destinations</a>
+    </div>
+
+    <div class="form-container">
+        {{ form_start(form) }}
+            <div class="form-grid">
+                <div class="form-group">
+                    {{ form_label(form.name) }}
+                    {{ form_widget(form.name) }}
+                    {{ form_errors(form.name) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.location) }}
+                    {{ form_widget(form.location) }}
+                    {{ form_errors(form.location) }}
+                </div>
+
+                <div class="form-group full-width">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                <div class="form-group full-width">
+                    {{ form_label(form.image) }}
+                    {{ form_widget(form.image) }}
+                    {{ form_errors(form.image) }}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-add">Create Destination</button>
+                <a href="{{ path('admin_destinations_index') }}" class="btn-view">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<style>
+.admin-section {
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
+}
+
+.form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    max-width: 800px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1.5px solid #74C15A;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #5ca74b;
+    box-shadow: 0 0 6px rgba(116, 193, 90, 0.5);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+}
+
+.btn-add {
+    background: #74C15A;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-add:hover {
+    background: #5ca74b;
+}
+
+.btn-view {
+    background: #6c757d;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.3s;
+}
+
+.btn-view:hover {
+    opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

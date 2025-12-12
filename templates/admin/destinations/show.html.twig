@@ -22,9 +22,9 @@
         </div>
 
         <div class="actions">
-            <a href="{{ path('app_destination_edit', {'id': destination.id}) }}" class="btn btn-edit">Edit</a>
-            <a href="{{ path('app_destination_index') }}" class="btn btn-back">Back to list</a>
-            {{ include('admin/destinations/_delete_form.html.twig') }}
+            <a href="{{ path('admin_destinations_edit', {'id': destination.id}) }}" class="btn btn-edit">Edit</a>
+            <a href="{{ path('admin_destinations_index') }}" class="btn btn-back">Back to list</a>
+            {{ include\('admin/destinations/_delete_form\.html\.twig', \{'id': destination\.id\}\) }}
         </div>
     </div>
 </div>

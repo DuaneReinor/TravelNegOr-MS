@@ -1,0 +1,340 @@
+{% extends 'staff/base.html.twig' %}
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block staff_content %}
+<div class="dashboard-container">
+    <div class="dashboard-card">
+        <div class="header-section">
+            <h1>Staff Dashboard</h1>
+            <p class="welcome-text">Welcome, {{ currentUser.firstName }}!</p>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-box destination">
+                <h2>Destinations</h2>
+                <p>{{ totalDestinations }}</p>
+                <small>All system destinations</small>
+            </div>
+
+            <div class="stat-box hotel">
+                <h2>Total Hotels</h2>
+                <p>{{ totalHotels }}</p>
+                <small>System-wide hotel count</small>
+            </div>
+
+            <div class="stat-box admin">
+                <h2>Total Users</h2>
+                <p>{{ totalUsers }}</p>
+                <small>System-wide user count</small>
+            </div>
+        </div>
+
+        {% if myDestinations|length > 0 %}
+        <div class="recent-destinations">
+            <h2>Recent Destinations</h2>
+            <div class="destinations-grid">
+                {% for destination in myDestinations|slice(0, 3) %}
+                <div class="destination-card-small">
+                    {% if destination.image %}
+                        <img src="{{ destination.image }}" alt="{{ destination.name }}">
+                    {% endif %}
+                    <h3>{{ destination.name }}</h3>
+                    <p class="location">{{ destination.location }}</p>
+                    <a href="{{ path('staff_destinations_show', {id: destination.id}) }}" class="btn-view">View Details</a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="view-all-link">
+                <a href="{{ path('staff_destinations_index') }}" class="btn-add">Manage Destinations</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if recentHotels|length > 0 %}
+        <div class="recent-hotels">
+            <h2>Recent Hotels</h2>
+            <div class="hotels-grid">
+                {% for hotel in recentHotels %}
+                <div class="hotel-card-small">
+                    {% if hotel.image %}
+                        <img src="{{ hotel.image }}" alt="{{ hotel.name }}">
+                    {% endif %}
+                    <h3>{{ hotel.name }}</h3>
+                    <p class="location">{{ hotel.location }}</p>
+                    <p class="price">₱{{ hotel.price|number_format(2) }}</p>
+                    <a href="{{ path('staff_hotels_show', {id: hotel.id}) }}" class="btn-view">View Details</a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="view-all-link">
+                <a href="{{ path('staff_hotels_index') }}" class="btn-add">Manage Hotels</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="{{ path('staff_destinations_new') }}" class="action-btn destination">
+                    <span class="action-icon">📍</span>
+                    <span class="action-text">Add Destination</span>
+                </a>
+                <a href="{{ path('staff_hotels_new') }}" class="action-btn hotel">
+                    <span class="action-icon">🏨</span>
+                    <span class="action-text">Add Hotel</span>
+                </a>
+                <a href="{{ path('staff_destinations_index') }}" class="action-btn manage">
+                    <span class="action-icon">⚙️</span>
+                    <span class="action-text">Manage Content</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh; 
+}
+
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1200px;
+    padding: 30px;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 20px;
+}
+
+.header-section h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+}
+
+.welcome-text {
+    color: #74C15A;
+    font-weight: 500;
+    margin: 0;
+}
+
+.stats-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    color: white;
+    border-radius: 12px;
+    padding: 25px;
+    width: 200px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-box h2 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.stat-box p {
+    font-size: 32px;
+    font-weight: bold;
+    margin: 0 0 5px 0;
+}
+
+.stat-box small {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.stat-box.destination {
+    background-color: #6f42c1;
+}
+
+.stat-box.hotel {
+    background-color: #fd7e14;
+}
+
+.stat-box.admin {
+    background-color: #007bff;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.recent-destinations, .recent-hotels {
+    margin-top: 30px;
+}
+
+.recent-destinations h2, .recent-hotels h2, .quick-actions h2 {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.destinations-grid, .hotels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.destination-card-small, .hotel-card-small {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease;
+}
+
+.destination-card-small:hover, .hotel-card-small:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.destination-card-small img, .hotel-card-small img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.destination-card-small h3, .hotel-card-small h3 {
+    color: #74C15A;
+    margin: 10px 0 5px 0;
+    font-size: 16px;
+}
+
+.destination-card-small .location, .hotel-card-small .location {
+    color: #666;
+    font-size: 14px;
+    margin: 0 0 10px 0;
+}
+
+.hotel-card-small .price {
+    color: #fd7e14;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 0 0 10px 0;
+}
+
+.view-all-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-add {
+    background: #74C15A;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    transition: background 0.3s;
+}
+
+.btn-add:hover {
+    background-color: #5ca74b;
+}
+
+.btn-view {
+    background: #6c757d;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Quick Actions Styles */
+.quick-actions {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.action-btn {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-btn:hover {
+    border-color: #74C15A;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.action-icon {
+    font-size: 24px;
+}
+
+.action-text {
+    font-weight: 600;
+    color: #333;
+}
+
+.action-btn.destination:hover {
+    border-color: #6f42c1;
+}
+
+.action-btn.hotel:hover {
+    border-color: #fd7e14;
+}
+
+.action-btn.manage:hover {
+    border-color: #007bff;
+}
+
+@media (max-width: 768px) {
+    .stats-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .destinations-grid, .hotels-grid, .actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

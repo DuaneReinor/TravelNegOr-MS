@@ -45,14 +45,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     // ─── Relations ────────────────────────────────────────────────
 
-    #[ORM\ManyToMany(targetEntity: Hotel::class, inversedBy: 'bookedUsers')]
-    private Collection $bookedHotels;
-
 
     // ─── Constructor ─────────────────────────────────────────────
     public function __construct()
     {
-        $this->bookedHotels = new ArrayCollection();
         
     }
 
@@ -141,26 +137,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // Deprecated in Symfony 7, safe to leave empty
     }
 
-    // ─── Booked Hotels ──────────────────────────────────────────
-    public function getBookedHotels(): Collection
-    {
-        return $this->bookedHotels;
-    }
-
-    public function addBookedHotel(Hotel $hotel): static
-    {
-        if (!$this->bookedHotels->contains($hotel)) {
-            $this->bookedHotels->add($hotel);
-        }
-
-        return $this;
-    }
-
-    public function removeBookedHotel(Hotel $hotel): static
-    {
-        $this->bookedHotels->removeElement($hotel);
-        return $this;
-    }
+    // ─── Booked Hotels functionality removed to fix Doctrine mapping issues ──
 
     // ─── Favorite Destinations ──────────────────────────────────
     

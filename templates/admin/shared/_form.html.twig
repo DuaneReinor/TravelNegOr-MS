@@ -1,0 +1,526 @@
+{{ form_start(form, {'attr': {'class': 'admin-form', 'novalidate': 'novalidate'}}) }}
+
+<div class="form-header">
+    <div class="form-breadcrumb">
+        <a href="{{ path('admin_dashboard') }}" class="breadcrumb-link">Dashboard</a>
+        <span class="breadcrumb-separator">/</span>
+        {% if form.vars.data %}
+            {% set entityType = 'Item' %}
+            {% if 'destination' in form.vars.name %}
+                <a href="{{ path('admin_destinations_index') }}" class="breadcrumb-link">Destinations</a>
+            {% elseif 'hotel' in form.vars.name %}
+                <a href="{{ path('admin_hotels_index') }}" class="breadcrumb-link">Hotels</a>
+            {% elseif 'user' in form.vars.name %}
+                <a href="{{ path('admin_users_index') }}" class="breadcrumb-link">Users</a>
+            {% endif %}
+        {% endif %}
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">{{ button_label|default('Create') }}</span>
+    </div>
+    <h1 class="form-title">
+        {% if button_label|default('Save') == 'Create' %}
+            <i class="icon-plus"></i>
+            Create New Item
+        {% else %}
+            <i class="icon-edit"></i>
+            Edit Item
+        {% endif %}
+    </h1>
+</div>
+
+<div class="form-content">
+    <div class="form-section">
+        <div class="form-grid">
+            {% for field in form %}
+                {% if field.vars.name != '_token' %}
+                    <div class="form-group {{ field.vars.block_prefixes.1|default('') }}">
+                        <label for="{{ field.vars.id }}" class="form-label">
+                            {{ field.vars.label|default(field.vars.name|title) }}
+                            {% if field.vars.required %}
+                                <span class="required-mark">*</span>
+                            {% endif %}
+                        </label>
+                        
+                        {% if field.vars.block_prefixes.1 == 'choice' %}
+                            {{ form_widget(field, {
+                                'attr': {
+                                    'class': 'form-control form-select',
+                                    'placeholder': field.vars.label|default(field.vars.name|title)
+                                }
+                            }) }}
+                        {% elseif field.vars.block_prefixes.1 == 'textarea' %}
+                            {{ form_widget(field, {
+                                'attr': {
+                                    'class': 'form-control form-textarea',
+                                    'placeholder': field.vars.label|default(field.vars.name|title),
+                                    'rows': '4'
+                                }
+                            }) }}
+                        {% elseif 'file' in field.vars.name %}
+                            <div class="file-upload-group">
+                                {{ form_widget(field, {
+                                    'attr': {
+                                        'class': 'form-control form-file',
+                                        'accept': 'image/*'
+                                    }
+                                }) }}
+                                <label for="{{ field.vars.id }}" class="file-upload-label">
+                                    <i class="icon-upload"></i>
+                                    <span class="file-upload-text">Choose file</span>
+                                </label>
+                            </div>
+                        {% else %}
+                            {{ form_widget(field, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'placeholder': field.vars.label|default(field.vars.name|title)
+                                }
+                            }) }}
+                        {% endif %}
+                        
+                        {% if field.vars.help is defined and field.vars.help %}
+                            <small class="form-help">{{ field.vars.help }}</small>
+                        {% endif %}
+                        
+                        {{ form_errors(field) }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="form-footer">
+    <div class="form-actions">
+        <a href="{{ app.request.headers.get('referer') }}" class="btn btn-secondary">
+            <i class="icon-arrow-left"></i>
+            Cancel
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="icon-save"></i>
+            {{ button_label|default('Save') }}
+        </button>
+    </div>
+</div>
+
+{{ form_end(form, {'render_rest': false}) }}
+
+<style>
+/* ===== SHARED FORM STYLES ===== */
+.admin-form {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: var(--font-family-sans, 'Montserrat', sans-serif);
+}
+
+/* ===== BREADCRUMB ===== */
+.form-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.breadcrumb-link {
+    color: var(--primary-color, #74C15A);
+    text-decoration: none;
+    transition: var(--transition, all 0.3s ease);
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: var(--gray-500, #adb5bd);
+}
+
+.breadcrumb-current {
+    color: var(--gray-700, #495057);
+    font-weight: 600;
+}
+
+/* ===== FORM HEADER ===== */
+.form-header {
+    background: linear-gradient(135deg, var(--primary-color, #74C15A) 0%, var(--primary-dark, #5ca74b) 100%);
+    color: white;
+    padding: 2rem;
+    margin: -2rem -2rem 2rem -2rem;
+}
+
+.form-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ===== FORM CONTENT ===== */
+.form-content {
+    padding: 0 2rem;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ===== FORM GROUPS ===== */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* ===== LABELS ===== */
+.form-label {
+    font-weight: 600;
+    color: var(--gray-700, #495057);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.required-mark {
+    color: var(--danger-color, #dc3545);
+    font-weight: 700;
+}
+
+/* ===== FORM CONTROLS ===== */
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--gray-300, #dee2e6);
+    border-radius: var(--border-radius, 8px);
+    font-family: var(--font-family-sans, 'Montserrat', sans-serif);
+    font-size: 0.875rem;
+    transition: var(--transition, all 0.3s ease);
+    background: var(--white, #ffffff);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color, #74C15A);
+    box-shadow: 0 0 0 3px rgba(116, 193, 90, 0.1);
+}
+
+.form-control:hover {
+    border-color: var(--gray-400, #ced4da);
+}
+
+/* ===== SELECT ===== */
+.form-select {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem;
+    appearance: none;
+}
+
+/* ===== TEXTAREA ===== */
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ===== FILE UPLOAD ===== */
+.file-upload-group {
+    position: relative;
+}
+
+.form-file {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 2px dashed var(--gray-300, #dee2e6);
+    border-radius: var(--border-radius, 8px);
+    background: var(--gray-50, #f8f9fa);
+    cursor: pointer;
+    transition: var(--transition, all 0.3s ease);
+    font-size: 0.875rem;
+    color: var(--gray-600, #6c757d);
+}
+
+.file-upload-label:hover {
+    border-color: var(--primary-color, #74C15A);
+    background: rgba(116, 193, 90, 0.05);
+}
+
+.file-upload-text {
+    font-weight: 500;
+}
+
+/* ===== HELP TEXT ===== */
+.form-help {
+    font-size: 0.75rem;
+    color: var(--gray-500, #adb5bd);
+    margin-top: 0.25rem;
+}
+
+/* ===== FORM ERRORS ===== */
+.form-control.is-invalid {
+    border-color: var(--danger-color, #dc3545);
+}
+
+.form-control.is-valid {
+    border-color: var(--success-color, #28a745);
+}
+
+.form-error {
+    color: var(--danger-color, #dc3545);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* ===== FORM FOOTER ===== */
+.form-footer {
+    padding: 2rem;
+    background: var(--gray-50, #f8f9fa);
+    margin: 2rem -2rem -2rem -2rem;
+    border-top: 1px solid var(--gray-200, #e9ecef);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius, 8px);
+    font-family: var(--font-family-sans, 'Montserrat', sans-serif);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition, all 0.3s ease);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: var(--primary-color, #74C15A);
+    color: var(--white, #ffffff);
+    box-shadow: 0 2px 8px rgba(116, 193, 90, 0.3);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark, #5ca74b);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(116, 193, 90, 0.4);
+}
+
+.btn-secondary {
+    background: var(--gray-600, #6c757d);
+    color: var(--white, #ffffff);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-700, #495057);
+    transform: translateY(-1px);
+}
+
+/* ===== ICONS ===== */
+[class^="icon-"], [class*=" icon-"] {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+}
+
+.icon-plus::before { content: "\f067"; }
+.icon-edit::before { content: "\f044"; }
+.icon-arrow-left::before { content: "\f060"; }
+.icon-save::before { content: "\f0c7"; }
+.icon-upload::before { content: "\f093"; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .admin-form {
+        margin: 0 1rem;
+    }
+    
+    .form-header {
+        padding: 1.5rem;
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    }
+    
+    .form-content {
+        padding: 0 1rem;
+    }
+    
+    .form-footer {
+        padding: 1.5rem;
+        margin: 1.5rem -1.5rem -1.5rem -1.5rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-title {
+        font-size: 1.25rem;
+    }
+    
+    .breadcrumb {
+        font-size: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .form-control {
+        padding: 0.625rem 0.875rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // File upload enhancement
+    const fileInputs = document.querySelectorAll('.form-file');
+    fileInputs.forEach(input => {
+        const label = input.nextElementSibling;
+        const textSpan = label.querySelector('.file-upload-text');
+        
+        input.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                textSpan.textContent = this.files[0].name;
+                label.style.borderColor = 'var(--success-color, #28a745)';
+                label.style.background = 'rgba(40, 167, 69, 0.05)';
+            } else {
+                textSpan.textContent = 'Choose file';
+                label.style.borderColor = 'var(--gray-300, #dee2e6)';
+                label.style.background = 'var(--gray-50, #f8f9fa)';
+            }
+        });
+    });
+    
+    // Form validation enhancement
+    const form = document.querySelector('.admin-form');
+    if (form) {
+        const inputs = form.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    validateField(this);
+                }
+            });
+        });
+    }
+    
+    function validateField(field) {
+        const value = field.value.trim();
+        const isRequired = field.hasAttribute('required');
+        
+        // Remove previous validation classes
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        if (isRequired && !value) {
+            field.classList.add('is-invalid');
+            return false;
+        }
+        
+        // Email validation
+        if (field.type === 'email' && value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                field.classList.add('is-invalid');
+                return false;
+            }
+        }
+        
+        // Password validation
+        if (field.type === 'password' && value && value.length < 6) {
+            field.classList.add('is-invalid');
+            return false;
+        }
+        
+        if (value || isRequired) {
+            field.classList.add('is-valid');
+        }
+        
+        return true;
+    }
+    
+    // Form submission enhancement
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="icon-spinner fa-spin"></i> Saving...';
+                
+                // Re-enable after 3 seconds as fallback
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="icon-save"></i> {{ button_label|default('Save') }}';
+                }, 3000);
+            }
+        });
+    }
+});
+</script>

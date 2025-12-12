@@ -1,0 +1,136 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Activity Log Demo{% endblock %}
+
+{% block admin_content %}
+<div class="admin-section">
+    <div class="page-header">
+        <h1>Activity Log System Demo</h1>
+    </div>
+
+    <div class="demo-container">
+        <div class="alert alert-info">
+            <h3>Demo Test Results</h3>
+            <p>This page demonstrates the activity logging system in action. A test destination was created and updated, which should have generated activity log entries.</p>
+        </div>
+
+        <div class="demo-stats">
+            <h3>Test Destination Created:</h3>
+            <ul>
+                <li><strong>Name:</strong> {{ destination.name }}</li>
+                <li><strong>Location:</strong> {{ destination.location }}</li>
+                <li><strong>Description:</strong> {{ destination.description }}</li>
+                <li><strong>Created By:</strong> {{ destination.createdBy.email }}</li>
+            </ul>
+        </div>
+
+        <div class="activity-logs-section">
+            <h3>Recent Activity Logs ({{ total_logs }} total)</h3>
+            
+            {% if recent_logs|length > 0 %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Action</th>
+                            <th>Entity Type</th>
+                            <th>Entity Name</th>
+                            <th>User</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td>{{ log.createdAt|date('Y-m-d H:i:s') }}</td>
+                            <td>
+                                <span class="role-badge {% if log.action == 'CREATE' %}admin{% elseif log.action == 'UPDATE' %}user{% else %}staff{% endif %}">
+                                    {{ log.action }}
+                                </span>
+                            </td>
+                            <td>{{ log.entityType }}</td>
+                            <td>{{ log.entityName ?? 'N/A' }}</td>
+                            <td>{{ log.userEmail ?? 'System' }}</td>
+                            <td>{{ log.description }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-warning">
+                    <p>No activity logs found. This might indicate that the ActivityLogSubscriber is not working properly in the current context.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="demo-instructions">
+            <h3>How Activity Logging Works</h3>
+            <ol>
+                <li><strong>Automatic Logging:</strong> All CREATE, UPDATE, and DELETE operations on Destination, Hotel, and User entities are automatically logged</li>
+                <li><strong>User Tracking:</strong> Each log entry includes the user who performed the action</li>
+                <li><strong>Data Changes:</strong> For UPDATE operations, both old and new data are captured</li>
+                <li><strong>Security Info:</strong> IP address and user agent are logged for security audit purposes</li>
+                <li><strong>View Logs:</strong> Admins can view all activity logs in the Activity Logs section</li>
+            </ol>
+        </div>
+
+        <div class="demo-actions">
+            <a href="{{ path('admin_activity_logs_index') }}" class="btn-add">View All Activity Logs</a>
+            <a href="{{ path('admin_dashboard') }}" class="btn-view">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.demo-stats {
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.activity-logs-section {
+    margin: 2rem 0;
+}
+
+.demo-instructions {
+    background: #e8f5e8;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.demo-actions {
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.demo-actions .btn-add,
+.demo-actions .btn-view {
+    margin: 0 0.5rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+</style>
+{% endblock %}
