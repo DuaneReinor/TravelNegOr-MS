@@ -20,62 +20,61 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
-        
     public const LOGIN_ROUTE = 'app_login';
 
     public function __construct(private UrlGeneratorInterface $urlGenerator)
     {
     }
 
-   public function authenticate(Request $request): Passport
-{
-    // ✅ Read form values from POST request
-    $email = $request->request->get('email', '');
-    $password = $request->request->get('password', '');
-    $csrfToken = $request->request->get('_csrf_token', '');
+    public function authenticate(Request $request): Passport
+    {
+        // Get the email and password from the request
+        $email = $request->request->get('email', '');
+        $password = $request->request->get('password', '');
+        $csrfToken = $request->request->get('_csrf_token', '');
 
-    // ✅ Store last username for auto-fill on login error
-    $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
+        // Store the last username for the login form
+        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
-    return new Passport(
-        new UserBadge($email),
-        new PasswordCredentials($password),
-        [
-            new CsrfTokenBadge('authenticate', $csrfToken),
-            new RememberMeBadge(),
-        ]
-    );
-}
-
-
-   public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
-{
-    // If the user was trying to access a protected page, redirect them there
-    if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
-        return new RedirectResponse($targetPath);
+        // Create a passport with the user credentials and CSRF token badge
+        // The CsrfTokenBadge will automatically validate the CSRF token
+        // using Symfony's built-in CSRF validation system
+        return new Passport(
+            new UserBadge($email),
+            new PasswordCredentials($password),
+            [
+                // This badge validates the CSRF token automatically
+                // It uses the token ID 'authenticate' to match the form field
+                new CsrfTokenBadge('authenticate', $csrfToken),
+                new RememberMeBadge(),
+            ]
+        );
     }
 
-    $user = $token->getUser();
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    {
+        // If the user was trying to access a protected page, redirect them there
+        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
+            return new RedirectResponse($targetPath);
+        }
 
-    // ✅ If Admin, go to admin dashboard
-    if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-        return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+        $user = $token->getUser();
+
+        // Redirect based on user role
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+        }
+        
+        if (in_array('ROLE_STAFF', $user->getRoles(), true)) {
+            return new RedirectResponse($this->urlGenerator->generate('staff_dashboard'));
+        }
+
+        // Default redirect for regular users
+        return new RedirectResponse($this->urlGenerator->generate('home'));
     }
-    
-    // ✅ If Staff, go to staff dashboard
-    if (in_array('ROLE_STAFF', $user->getRoles(), true)) {
-        return new RedirectResponse($this->urlGenerator->generate('staff_dashboard'));
-    }
-
-    // ✅ Otherwise, redirect normal users to home page
-    return new RedirectResponse($this->urlGenerator->generate('home'));
-}
-
 
     protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
-
-    
 }

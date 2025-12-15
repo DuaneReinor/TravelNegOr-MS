@@ -24,7 +24,7 @@
 
         <a href="{{ path('admin_users_edit', {'id': user.id}) }}" class="btn btn-edit">Edit</a>
         <a href="{{ path('admin_users_index') }}" class="btn btn-back">Back</a>
-        {{ include('admin/users/_delete_form.html.twig') }}
+        {{ include('admin/users/_delete_form.html.twig', {'user': user}) }}
     </div>
 </div>
 {% endblock %}

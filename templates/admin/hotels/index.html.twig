@@ -44,7 +44,7 @@
                                 <td>{{ hotel.description|length > 30 ? hotel.description|slice(0, 30) ~ '...' : hotel.description }}</td>
                                 <td>
                                     {% if hotel.image %}
-                                        <img src="{{ asset('uploads/images/' ~ hotel.image) }}" alt="{{ hotel.name }}" class="hotel-thumb">
+                                        <img src="{{ asset('uploads/' ~ hotel.image) }}" alt="{{ hotel.name }}" class="hotel-thumb">
                                     {% else %}
                                         <em>No image</em>
                                     {% endif %}
@@ -52,7 +52,7 @@
                                 <td class="actions">
                                     <a href="{{ path('admin_hotels_show', {'id': hotel.id}) }}" class="btn-action view">View</a>
                                     <a href="{{ path('admin_hotels_edit', {'id': hotel.id}) }}" class="btn-action edit">Edit</a>
-                                    {{ include('admin/hotels/_delete_form.html.twig') }}
+                                    {{ include('admin/hotels/_delete_form.html.twig', {'hotel': hotel}) }}
                                 </td>
                             </tr>
                         {% else %}

@@ -8,6 +8,7 @@ use App\Form\DestinationType;
 use App\Repository\DestinationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,20 +48,34 @@ class AdminDestinationController extends AbstractController
         $destination = new Destination();
         // Set the creator for all new destinations
         $destination->setCreatedBy($this->getUser());
+        // Set a default image placeholder
+        $destination->setImage('default-destination.jpg');
         
         $form = $this->createForm(DestinationType::class, $destination);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle file upload
+            $this->handleImageUpload($destination, $form);
+            
             $em->persist($destination);
             $em->flush();
             
             // Log the activity
-            $this->logActivity('CREATE', 'Destination', $destination->getId(), $destination->getName(), 
+            $this->logActivity('CREATE', 'Destination', $destination->getId(), $destination->getName(),
                 "Created destination: {$destination->getName()} in {$destination->getLocation()}");
             
             $this->addFlash('success', 'Destination created.');
             return $this->redirectToRoute('admin_destinations_index');
+        } elseif ($form->isSubmitted()) {
+            // Form submitted but not valid - collect errors
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            if (!empty($errors)) {
+                $this->addFlash('error', 'Form validation failed: ' . implode(', ', $errors));
+            }
         }
 
         return $this->render('admin/destinations/new.html.twig', [
@@ -89,14 +104,26 @@ class AdminDestinationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle file upload
+            $this->handleImageUpload($destination, $form);
+            
             $em->flush();
             
             // Log the activity
-            $this->logActivity('UPDATE', 'Destination', $destination->getId(), $destination->getName(), 
+            $this->logActivity('UPDATE', 'Destination', $destination->getId(), $destination->getName(),
                 "Updated destination: {$destination->getName()}");
             
             $this->addFlash('success', 'Destination updated.');
             return $this->redirectToRoute('admin_destinations_index');
+        } elseif ($form->isSubmitted()) {
+            // Form submitted but not valid - collect errors
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            if (!empty($errors)) {
+                $this->addFlash('error', 'Form validation failed: ' . implode(', ', $errors));
+            }
         }
 
         return $this->render('admin/destinations/edit.html.twig', [
@@ -126,6 +153,30 @@ class AdminDestinationController extends AbstractController
             $this->addFlash('success', 'Destination deleted.');
         }
         return $this->redirectToRoute('admin_destinations_index');
+    }
+
+    /**
+     * Handle image upload for destinations
+     */
+    private function handleImageUpload(Destination $destination, $form): void
+    {
+        $imageFile = $form->get('image')->getData();
+        
+        if ($imageFile instanceof UploadedFile) {
+            $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/destinations';
+            if (!is_dir($uploadsDir)) {
+                mkdir($uploadsDir, 0755, true);
+            }
+            
+            $fileName = uniqid() . '.' . $imageFile->guessExtension();
+            
+            // Move the file to the uploads directory
+            $imageFile->move($uploadsDir, $fileName);
+            
+            // Update the destination with the new image filename
+            $destination->setImage($fileName);
+        }
+        // If no new file is uploaded, keep the existing image (do nothing)
     }
 
     /**

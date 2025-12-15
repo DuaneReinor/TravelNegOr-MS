@@ -12,8 +12,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/hotels', name: 'admin_hotels_')]
+#[IsGranted('ROLE_ADMIN')]
 class AdminHotelController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
@@ -36,38 +38,53 @@ class AdminHotelController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request): Response
     {
         $hotel = new Hotel();
         $form = $this->createForm(HotelType::class, $hotel);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $imageFile = $form->get('image')->getData(); // 👈 get uploaded file
+            try {
+                $imageFile = $form->get('image')->getData();
 
-            if ($imageFile) {
-                // Create a unique filename
-                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                if ($imageFile) {
+                    $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads';
+                    if (!is_dir($uploadsDir)) {
+                        mkdir($uploadsDir, 0755, true);
+                    }
+                    
+                    $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                    $imageFile->move($uploadsDir, $newFilename);
+                    $hotel->setImage($newFilename);
+                }
 
-                // Move the file to /public/uploads
-                $imageFile->move(
-                    $this->getParameter('kernel.project_dir') . '/public/uploads',
-                    $newFilename
-                );
+                $this->entityManager->persist($hotel);
+                $this->entityManager->flush();
 
-                // Save the filename in the entity
-                $hotel->setImage($newFilename);
+                // Log the activity with error handling
+                try {
+                    $this->logActivity('CREATE', 'Hotel', $hotel->getId(), $hotel->getName(),
+                        "Created hotel: {$hotel->getName()} in {$hotel->getLocation()}");
+                } catch (\Exception $e) {
+                    // Don't fail the entire operation if logging fails
+                    error_log('Activity logging failed: ' . $e->getMessage());
+                }
+
+                $this->addFlash('success', 'Hotel created successfully!');
+                return $this->redirectToRoute('admin_hotels_index');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Failed to create hotel: ' . $e->getMessage());
             }
-
-            $entityManager->persist($hotel);
-            $entityManager->flush();
-
-            // Log the activity
-            $this->logActivity('CREATE', 'Hotel', $hotel->getId(), $hotel->getName(), 
-                "Created hotel: {$hotel->getName()} in {$hotel->getLocation()}");
-
-            $this->addFlash('success', 'Hotel created successfully!');
-            return $this->redirectToRoute('admin_hotels_index');
+        } elseif ($form->isSubmitted()) {
+            // Form submitted but not valid - collect errors
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            if (!empty($errors)) {
+                $this->addFlash('error', 'Form validation failed: ' . implode(', ', $errors));
+            }
         }
 
         return $this->render('admin/hotels/new.html.twig', [
@@ -84,32 +101,49 @@ class AdminHotelController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Hotel $hotel, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Hotel $hotel): Response
     {
         $form = $this->createForm(HotelType::class, $hotel);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $imageFile = $form->get('image')->getData();
+            try {
+                $imageFile = $form->get('image')->getData();
+                if ($imageFile) {
+                    $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads';
+                    if (!is_dir($uploadsDir)) {
+                        mkdir($uploadsDir, 0755, true);
+                    }
+                    
+                    $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                    $imageFile->move($uploadsDir, $newFilename);
+                    $hotel->setImage($newFilename);
+                }
 
-            if ($imageFile) {
-                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
-                $imageFile->move(
-                    $this->getParameter('kernel.project_dir') . '/public/uploads',
-                    $newFilename
-                );
+                $this->entityManager->flush();
 
-                $hotel->setImage($newFilename);
+                // Log the activity with error handling
+                try {
+                    $this->logActivity('UPDATE', 'Hotel', $hotel->getId(), $hotel->getName(),
+                        "Updated hotel: {$hotel->getName()}");
+                } catch (\Exception $e) {
+                    error_log('Activity logging failed: ' . $e->getMessage());
+                }
+
+                $this->addFlash('success', 'Hotel updated successfully!');
+                return $this->redirectToRoute('admin_hotels_index');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Failed to update hotel: ' . $e->getMessage());
             }
-
-            $entityManager->flush();
-
-            // Log the activity
-            $this->logActivity('UPDATE', 'Hotel', $hotel->getId(), $hotel->getName(), 
-                "Updated hotel: {$hotel->getName()}");
-
-            $this->addFlash('success', 'Hotel updated successfully!');
-            return $this->redirectToRoute('admin_hotels_index');
+        } elseif ($form->isSubmitted()) {
+            // Form submitted but not valid - collect errors
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            if (!empty($errors)) {
+                $this->addFlash('error', 'Form validation failed: ' . implode(', ', $errors));
+            }
         }
 
         return $this->render('admin/hotels/edit.html.twig', [
@@ -119,7 +153,7 @@ class AdminHotelController extends AbstractController
     }
 
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
-    public function delete(Request $request, int $id, HotelRepository $hotelRepository, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id, HotelRepository $hotelRepository): Response
     {
         $hotel = $hotelRepository->find($id);
 
@@ -129,17 +163,25 @@ class AdminHotelController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('delete' . $hotel->getId(), $request->getPayload()->getString('_token'))) {
-            $hotelName = $hotel->getName();
-            $hotelId = $hotel->getId();
-            
-            $entityManager->remove($hotel);
-            $entityManager->flush();
-            
-            // Log the activity
-            $this->logActivity('DELETE', 'Hotel', $hotelId, $hotelName, 
-                "Deleted hotel: {$hotelName}");
-            
-            $this->addFlash('success', 'Hotel deleted successfully.');
+            try {
+                $hotelName = $hotel->getName();
+                $hotelId = $hotel->getId();
+                
+                $this->entityManager->remove($hotel);
+                $this->entityManager->flush();
+                
+                // Log the activity with error handling
+                try {
+                    $this->logActivity('DELETE', 'Hotel', $hotelId, $hotelName, 
+                        "Deleted hotel: {$hotelName}");
+                } catch (\Exception $e) {
+                    error_log('Activity logging failed: ' . $e->getMessage());
+                }
+                
+                $this->addFlash('success', 'Hotel deleted successfully.');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Failed to delete hotel: ' . $e->getMessage());
+            }
         }
 
         return $this->redirectToRoute('admin_hotels_index');
@@ -154,12 +196,12 @@ class AdminHotelController extends AbstractController
         $request = $this->requestStack->getCurrentRequest();
         
         $activityLog = ActivityLog::create(
-            action: $action,
-            entityType: $entityType,
-            entityId: $entityId,
-            entityName: $entityName,
-            user: $user,
-            description: $description
+            $action,
+            $entityType,
+            $entityId,
+            $entityName,
+            $user,
+            $description
         );
 
         if ($request) {

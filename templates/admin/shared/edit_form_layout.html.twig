@@ -1,0 +1,463 @@
+{# 
+    Shared Edit Form Layout Component
+    Provides consistent styling and structure for all admin edit forms
+#}
+
+{% macro render_edit_form(form, back_path, entity_name, page_title, page_subtitle, submit_button_text) %}
+<div class="admin-edit-container">
+    <div class="admin-edit-header">
+        <div class="admin-edit-nav">
+            <a href="{{ back_path }}" class="admin-nav-back">
+                ← Back to {{ entity_name }}
+            </a>
+        </div>
+        <h1 class="admin-edit-title">{{ page_title }}</h1>
+        <p class="admin-edit-subtitle">{{ page_subtitle }}</p>
+    </div>
+
+    <div class="admin-edit-content">
+        <div class="admin-edit-card">
+            {{ form_start(form, {
+                'attr': {
+                    'class': 'admin-edit-form',
+                    'novalidate': 'novalidate'
+                }
+            }) }}
+            
+            {# Hidden CSRF token field #}
+            {{ form_widget(form._token) }}
+            
+            <div class="admin-form-section">
+                <div class="admin-form-grid">
+                    {% for field in form %}
+                        {% if field.vars.name != '_token' %}
+                            <div class="admin-form-field {{ field.vars.block_prefixes.1|default('') }}">
+                                <label for="{{ field.vars.id }}" class="admin-field-label">
+                                    {{ field.vars.label|default(field.vars.name|title) }}
+                                    {% if field.vars.required %}
+                                        <span class="admin-required">*</span>
+                                    {% endif %}
+                                </label>
+                                
+                                {% if field.vars.block_prefixes.1 == 'choice' %}
+                                    {{ form_widget(field, {
+                                        'attr': {
+                                            'class': 'admin-field-input admin-field-select',
+                                            'placeholder': field.vars.label|default(field.vars.name|title)
+                                        }
+                                    }) }}
+                                {% elseif field.vars.block_prefixes.1 == 'textarea' %}
+                                    {{ form_widget(field, {
+                                        'attr': {
+                                            'class': 'admin-field-input admin-field-textarea',
+                                            'placeholder': field.vars.label|default(field.vars.name|title),
+                                            'rows': '4'
+                                        }
+                                    }) }}
+                                {% elseif 'file' in field.vars.name %}
+                                    <div class="admin-file-upload">
+                                        {{ form_widget(field, {
+                                            'attr': {
+                                                'class': 'admin-file-input',
+                                                'accept': 'image/*'
+                                            }
+                                        }) }}
+                                        <div class="admin-file-display">
+                                            {% if form.vars.data.image %}
+                                                <div class="current-image">
+                                                    <img src="{{ asset('uploads/' ~ form.vars.data.image) }}" alt="Current image" class="admin-current-image">
+                                                    <p class="image-label">Current image - Choose a new file to replace</p>
+                                                </div>
+                                                <span class="admin-file-text">📁 Choose new file</span>
+                                            {% else %}
+                                                <span class="admin-file-text">📁 Choose file</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    {{ form_widget(field, {
+                                        'attr': {
+                                            'class': 'admin-field-input',
+                                            'placeholder': field.vars.label|default(field.vars.name|title)
+                                        }
+                                    }) }}
+                                {% endif %}
+                                
+                                {{ form_errors(field) }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="admin-form-actions">
+                <a href="{{ back_path }}" class="admin-btn admin-btn-secondary">
+                    Cancel
+                </a>
+                <button type="submit" class="admin-btn admin-btn-primary">
+                    💾 {{ submit_button_text|default('Update') }}
+                </button>
+            </div>
+
+            {{ form_end(form, {'render_rest': false}) }}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Admin Edit Form Styles - Unified Design System with Green Theme */
+.admin-edit-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    padding: 2rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.admin-edit-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+.admin-edit-nav {
+    margin-bottom: 1.5rem;
+}
+
+.admin-nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.admin-nav-back:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.admin-edit-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.admin-edit-subtitle {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    font-weight: 400;
+}
+
+.admin-edit-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-edit-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.admin-form-section {
+    padding: 2.5rem;
+}
+
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.admin-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.admin-form-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.admin-field-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+
+.admin-required {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.admin-field-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    background: #fafafa;
+}
+
+.admin-field-input:focus {
+    outline: none;
+    border-color: #10b981;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    transform: translateY(-1px);
+}
+
+.admin-field-input:hover {
+    border-color: #d1d5db;
+    background: white;
+}
+
+.admin-field-select {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem;
+    appearance: none;
+}
+
+.admin-field-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.admin-file-upload {
+    position: relative;
+}
+
+.admin-file-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.admin-file-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    color: #6b7280;
+    min-height: 60px;
+}
+
+.admin-file-display:hover {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.admin-file-text {
+    font-weight: 500;
+}
+
+.admin-form-actions {
+    padding: 2rem 2.5rem;
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.admin-btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+}
+
+.admin-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.4);
+}
+
+.admin-btn-secondary {
+    background: white;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+}
+
+.admin-btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+    transform: translateY(-1px);
+}
+
+/* Current Image Display */
+.current-image {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.admin-current-image {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 8px;
+    border: 2px solid #10b981;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
+.image-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0.5rem 0 0 0;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-edit-container {
+        padding: 1rem;
+    }
+    
+    .admin-edit-title {
+        font-size: 1.75rem;
+    }
+    
+    .admin-form-section {
+        padding: 1.5rem;
+    }
+    
+    .admin-form-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .admin-form-actions {
+        padding: 1.5rem;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .admin-btn {
+        width: 100%;
+    }
+}
+
+/* Animation for file upload success */
+.admin-file-display.success {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.05);
+    color: #059669;
+}
+
+.admin-file-display.success .admin-file-text::before {
+    content: "✅ ";
+}
+
+/* Loading state for submit button */
+.admin-btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.admin-btn.loading::after {
+    content: "";
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced file upload functionality
+    const fileInputs = document.querySelectorAll('.admin-file-input');
+    fileInputs.forEach(input => {
+        const display = input.nextElementSibling;
+        const text = display.querySelector('.admin-file-text');
+        
+        input.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                text.textContent = '✅ ' + this.files[0].name;
+                display.classList.add('success');
+            } else {
+                text.textContent = '📁 Choose file';
+                display.classList.remove('success');
+            }
+        });
+    });
+    
+    // Enhanced form submission with loading state
+    const form = document.querySelector('.admin-edit-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = originalText.replace('💾 ', '⏳ ');
+                
+                // Re-enable after 3 seconds as fallback
+                setTimeout(() => {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }, 3000);
+            }
+        });
+    }
+});
+</script>
+{% endmacro %}

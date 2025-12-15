@@ -30,6 +30,9 @@
 
 <div class="form-content">
     <div class="form-section">
+        {# Hidden CSRF token field #}
+        {{ form_widget(form._token) }}
+        
         <div class="form-grid">
             {% for field in form %}
                 {% if field.vars.name != '_token' %}

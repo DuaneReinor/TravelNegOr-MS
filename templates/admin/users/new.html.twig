@@ -4,6 +4,11 @@
 
 {% block admin_content %}
 <div class="form-page-container">
+    <div class="form-header">
+        <h1>Create New User</h1>
+        <p>Add a new user to the system</p>
+    </div>
+    
     {{ include('admin/shared/_form.html.twig', {
         'form': form,
         'button_label': 'Create User'
@@ -15,8 +20,27 @@
 <style>
 .form-page-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    padding: 2rem 1rem;
+    background: #f8fafc;
+    padding: 2rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+}
+
+.form-header p {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 0;
 }
 </style>
 {% endblock %}

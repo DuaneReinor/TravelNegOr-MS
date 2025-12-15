@@ -1,0 +1,255 @@
+# CSRF Ngrok Deployment Fix - Complete Guide
+
+## Overview
+
+This guide provides the complete solution for fixing CSRF token issues when deploying your Travel NegOr application via ngrok.
+
+## ✅ Fixes Applied
+
+### 1. CSRF Configuration (`config/packages/csrf.yaml`)
+
+**Before:**
+```yaml
+framework:
+    csrf_protection:
+        stateless_token_ids:
+            - submit
+            - authenticate
+            - logout
+```
+
+**After:**
+```yaml
+framework:
+    csrf_protection:
+        stateless_token_ids:
+            - submit
+            - authenticate
+            - logout
+        enabled: true
+```
+
+### 2. Enhanced Session Configuration (`config/packages/framework.yaml`)
+
+**Added ngrok-specific optimizations:**
+- Extended cookie lifetime: 3600 seconds (1 hour)
+- Unique session name to avoid conflicts
+- Extended garbage collection lifetime
+- Proper session storage path configuration
+
+### 3. Custom CSRF Token Manager (`src/Service/CsrfTokenManager.php`)
+
+Enhanced with:
+- Token regeneration capabilities
+- Token validation with metadata tracking
+- Automatic cleanup of expired tokens
+- Ngrok-specific compatibility checks
+
+### 4. Debug Tools
+
+Created new commands for troubleshooting:
+- `php bin/console app:debug-csrf-ngrok` - Comprehensive CSRF debugging
+- `php bin/console app:test-csrf-ngrok` - Automated CSRF testing
+
+## 🚀 Deployment Steps
+
+### Step 1: Clear Cache
+```bash
+php bin/console cache:clear --no-warmup
+```
+
+### Step 2: Start Your Application
+```bash
+# Option 1: Symfony CLI
+symfony serve -d --no-tls
+
+# Option 2: PHP built-in server
+php -S localhost:8000 -t public/
+```
+
+### Step 3: Start ngrok Tunnel
+```bash
+ngrok http 8000
+```
+
+### Step 4: Test CSRF Functionality
+```bash
+# Run comprehensive CSRF tests
+php bin/console app:test-csrf-ngrok
+
+# Run detailed debugging
+php bin/console app:debug-csrf-ngrok
+```
+
+## 🧪 Testing Checklist
+
+### 1. Basic CSRF Functionality
+- [ ] Access your login page via ngrok URL
+- [ ] Check browser developer tools for CSRF token in form
+- [ ] Attempt login with valid credentials
+- [ ] Verify successful authentication
+
+### 2. CSRF Token Validation
+- [ ] Open browser developer tools (F12)
+- [ ] Go to Application/Storage tab
+- [ ] Check Session Storage for CSRF tokens
+- [ ] Verify tokens are being stored and retrieved properly
+
+### 3. Session Persistence
+- [ ] Login successfully
+- [ ] Navigate to different pages
+- [ ] Verify session remains active
+- [ ] Test logout functionality
+
+### 4. Error Testing
+- [ ] Try submitting form with invalid CSRF token
+- [ ] Verify proper error handling
+- [ ] Check application logs for CSRF errors
+
+## 🔍 Troubleshooting
+
+### Common Issues and Solutions
+
+#### 1. "CSRF token is invalid" Error
+
+**Symptoms:** Login fails with CSRF validation error
+
+**Solutions:**
+1. Clear browser cache and cookies for the ngrok domain
+2. Check if ngrok tunnel is stable (restart if needed)
+3. Verify session configuration in `framework.yaml`
+4. Run debug command: `php bin/console app:debug-csrf-ngrok`
+
+#### 2. Session Not Persistent
+
+**Symptoms:** User gets logged out frequently
+
+**Solutions:**
+1. Check session configuration in `framework.yaml`
+2. Verify ngrok connection stability
+3. Increase session lifetime if needed
+4. Clear old session files: `rm -rf var/sessions/*`
+
+#### 3. Token Validation Fails Intermittently
+
+**Symptoms:** Random CSRF failures
+
+**Solutions:**
+1. Use stateless tokens (already configured)
+2. Check for timing issues
+3. Verify ngrok tunnel stability
+4. Monitor network connectivity
+
+### Debug Commands
+
+#### Clear All Sessions
+```bash
+php bin/console cache:clear
+rm -rf var/sessions/*
+```
+
+#### Check Configuration
+```bash
+php bin/console debug:config framework session
+php bin/console debug:config framework csrf_protection
+```
+
+#### Test CSRF Functionality
+```bash
+php bin/console app:test-csrf-ngrok
+php bin/console app:debug-csrf-ngrok
+```
+
+## 📋 Environment-Specific Settings
+
+### Development (.env.local)
+```env
+SESSION_LIFETIME=3600
+ENABLE_CSRF_DEBUG=true
+```
+
+### Production (.env.prod)
+```env
+SESSION_LIFETIME=1800
+ENABLE_CSRF_DEBUG=false
+```
+
+## 🔐 Security Best Practices for Ngrok
+
+### 1. Session Management
+- ✅ Use longer session lifetimes (1+ hours)
+- ✅ Implement proper session cleanup
+- ✅ Monitor session storage usage
+
+### 2. CSRF Token Handling
+- ✅ Use stateless tokens when possible
+- ✅ Implement graceful error handling
+- ✅ Enable automatic token refresh
+
+### 3. Network Security
+- ✅ Use HTTPS with ngrok when possible
+- ✅ Monitor for unusual CSRF patterns
+- ✅ Implement rate limiting if needed
+
+## 📞 Support and Monitoring
+
+### 1. Monitoring Commands
+```bash
+# Check active CSRF tokens
+php bin/console app:debug-csrf-ngrok
+
+# Test all CSRF functionality
+php bin/console app:test-csrf-ngrok
+```
+
+### 2. Log Monitoring
+Watch application logs for CSRF-related errors:
+```bash
+tail -f var/log/dev.log | grep CSRF
+```
+
+### 3. Performance Monitoring
+- Track CSRF validation success rates
+- Monitor session creation/destruction
+- Watch for unusual patterns
+
+## ✅ Verification Steps
+
+After applying all fixes, verify:
+
+1. **Configuration is valid:**
+   ```bash
+   php bin/console app:debug-csrf-ngrok
+   ```
+
+2. **Login works via ngrok:**
+   - Navigate to your ngrok URL + `/login`
+   - Login with valid credentials
+   - Verify successful authentication
+
+3. **CSRF tokens are working:**
+   - Check browser dev tools for CSRF tokens
+   - Test form submissions
+   - Verify no CSRF errors in logs
+
+4. **Session persistence:**
+   - Login and navigate between pages
+   - Verify session remains active
+   - Test logout functionality
+
+## 🎯 Success Indicators
+
+- ✅ CSRF debug command shows "OK" status
+- ✅ Login works without CSRF errors
+- ✅ Session persists across page navigation
+- ✅ No CSRF-related errors in application logs
+- ✅ Token generation and validation working
+
+## 📝 Next Steps
+
+1. Test the deployment using the provided script: `bash test-ngrok-deployment.sh`
+2. Monitor application logs for any CSRF issues
+3. Consider implementing additional security measures for production
+4. Set up automated testing for CSRF functionality
+
+For additional support, refer to the Symfony CSRF documentation and ngrok documentation linked in the original guide.

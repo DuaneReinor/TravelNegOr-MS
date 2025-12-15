@@ -1,0 +1,336 @@
+{#
+    Enhanced CSRF-protected form template for ngrok deployment
+    Provides automatic token refresh and error handling
+#}
+
+{% macro render_enhanced_form(form, form_config = {}) %}
+    {% set config = {
+        'csrf_token_id': 'submit',
+        'auto_refresh': true,
+        'show_debug': false,
+        'error_handling': true
+    }|merge(form_config) %}
+    
+    <div class="csrf-enhanced-form" data-csrf-config="{{ config|json_encode }}">
+        {{ form_start(form, {
+            'attr': {
+                'class': 'admin-form csfr-protected-form',
+                'novalidate': 'novalidate',
+                'data-csrf-token-id': config.csrf_token_id
+            }
+        }) }}
+        
+        {# Enhanced CSRF token with auto-refresh capability #}
+        <div class="csrf-token-container" data-token-id="{{ config.csrf_token_id }}">
+            {{ form_widget(form._token) }}
+            {# Additional ngrok-compatible token #}
+            {{ csrf_token_ngrok(config.csrf_token_id) }}
+        </div>
+        
+        {# CSRF debug information (only in development) #}
+        {% if config.show_debug and app.environment == 'dev' %}
+            {{ csrf_debug_info(config.csrf_token_id) }}
+            <div class="csrf-debug-panel" style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                <strong>CSRF Debug Info:</strong>
+                <pre id="csrf-debug-output"></pre>
+                <button type="button" onclick="refreshCsrfToken('{{ config.csrf_token_id }}')">Refresh Token</button>
+            </div>
+        {% endif %}
+        
+        <div class="form-content">
+            <div class="form-section">
+                <div class="form-grid">
+                    {% for field in form %}
+                        {% if field.vars.name != '_token' %}
+                            <div class="form-group {{ field.vars.block_prefixes.1|default('') }}">
+                                <label for="{{ field.vars.id }}" class="form-label">
+                                    {{ field.vars.label|default(field.vars.name|title) }}
+                                    {% if field.vars.required %}
+                                        <span class="required-mark">*</span>
+                                    {% endif %}
+                                </label>
+                                
+                                {% if field.vars.block_prefixes.1 == 'choice' %}
+                                    {{ form_widget(field, {
+                                        'attr': {
+                                            'class': 'form-control form-select',
+                                            'placeholder': field.vars.label|default(field.vars.name|title)
+                                        }
+                                    }) }}
+                                {% elseif field.vars.block_prefixes.1 == 'textarea' %}
+                                    {{ form_widget(field, {
+                                        'attr': {
+                                            'class': 'form-control form-textarea',
+                                            'placeholder': field.vars.label|default(field.vars.name|title),
+                                            'rows': '4'
+                                        }
+                                    }) }}
+                                {% elseif 'file' in field.vars.name %}
+                                    <div class="file-upload-group">
+                                        {{ form_widget(field, {
+                                            'attr': {
+                                                'class': 'form-control form-file',
+                                                'accept': 'image/*'
+                                            }
+                                        }) }}
+                                        <label for="{{ field.vars.id }}" class="file-upload-label">
+                                            <i class="icon-upload"></i>
+                                            <span class="file-upload-text">Choose file</span>
+                                        </label>
+                                    </div>
+                                {% else %}
+                                    {{ form_widget(field, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': field.vars.label|default(field.vars.name|title)
+                                        }
+                                    }) }}
+                                {% endif %}
+                                
+                                {% if field.vars.help is defined and field.vars.help %}
+                                    <small class="form-help">{{ field.vars.help }}</small>
+                                {% endif %}
+                                
+                                {{ form_errors(field) }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="icon-arrow-left"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary csrf-submit-btn">
+                    <i class="icon-save"></i>
+                    {{ button_label|default('Save') }}
+                </button>
+            </div>
+        </div>
+
+        {{ form_end(form, {'render_rest': false}) }}
+    </div>
+
+    <style>
+    .csrf-enhanced-form {
+        position: relative;
+    }
+    
+    .csrf-token-container {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+    
+    .csrf-error {
+        background: #fee;
+        border: 1px solid #fcc;
+        color: #c33;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+    }
+    
+    .csrf-success {
+        background: #efe;
+        border: 1px solid #cfc;
+        color: #3c3;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+    }
+    
+    .csrf-refresh-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    
+    .csrf-refresh-btn:hover {
+        background: #0056b3;
+    }
+    
+    .csrf-token-status {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .csrf-token-status.valid {
+        color: #28a745;
+    }
+    
+    .csrf-token-status.invalid {
+        color: #dc3545;
+    }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCsrfEnhancedForm();
+    });
+    
+    function initializeCsrfEnhancedForm() {
+        const form = document.querySelector('.csrf-enhanced-form');
+        if (!form) return;
+        
+        const config = JSON.parse(form.dataset.csrfConfig);
+        const tokenId = config.csrf_token_id;
+        
+        // Auto-refresh token if enabled
+        if (config.auto_refresh) {
+            setTimeout(() => refreshCsrfToken(tokenId), 30000); // Refresh every 30 seconds
+        }
+        
+        // Form submission handler with CSRF validation
+        form.addEventListener('submit', function(e) {
+            if (!validateCsrfToken(tokenId)) {
+                e.preventDefault();
+                showCsrfError('CSRF token validation failed. Please refresh the page and try again.');
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = form.querySelector('.csrf-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="icon-spinner fa-spin"></i> Saving...';
+            }
+        });
+        
+        // Debug info update
+        if (config.show_debug && app?.environment === 'dev') {
+            updateDebugInfo();
+        }
+    }
+    
+    function validateCsrfToken(tokenId) {
+        const form = document.querySelector('.csrf-enhanced-form');
+        const tokenInput = form.querySelector(`input[name="_csrf_token_${tokenId}"]`);
+        const originalToken = form.querySelector('input[name="_token"]');
+        
+        if (!tokenInput || !originalToken) {
+            console.warn('CSRF tokens not found');
+            return false;
+        }
+        
+        // Basic validation - both tokens should exist
+        return tokenInput.value.length > 0 && originalToken.value.length > 0;
+    }
+    
+    function refreshCsrfToken(tokenId) {
+        const form = document.querySelector('.csrf-enhanced-form');
+        if (!form) return;
+        
+        fetch('/admin/csrf/refresh/' + tokenId, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.token) {
+                updateCsrfToken(tokenId, data.token);
+                showCsrfSuccess('CSRF token refreshed successfully');
+            } else {
+                throw new Error(data.message || 'Token refresh failed');
+            }
+        })
+        .catch(error => {
+            console.error('CSRF token refresh failed:', error);
+            showCsrfError('Failed to refresh CSRF token: ' + error.message);
+        });
+    }
+    
+    function updateCsrfToken(tokenId, newToken) {
+        const form = document.querySelector('.csrf-enhanced-form');
+        const tokenInput = form.querySelector(`input[name="_csrf_token_${tokenId}"]`);
+        
+        if (tokenInput) {
+            tokenInput.value = newToken;
+            tokenInput.setAttribute('data-refreshed', new Date().toISOString());
+        }
+        
+        // Update status indicator
+        updateTokenStatus(tokenId, true);
+    }
+    
+    function updateTokenStatus(tokenId, isValid) {
+        let statusElement = document.querySelector(`[data-token-id="${tokenId}"] .csrf-token-status`);
+        
+        if (!statusElement) {
+            const container = document.querySelector(`[data-token-id="${tokenId}"]`);
+            if (container) {
+                statusElement = document.createElement('div');
+                statusElement.className = 'csrf-token-status';
+                container.appendChild(statusElement);
+            }
+        }
+        
+        if (statusElement) {
+            statusElement.className = `csrf-token-status ${isValid ? 'valid' : 'invalid'}`;
+            statusElement.textContent = isValid ? '✓ Token valid' : '✗ Token invalid';
+        }
+    }
+    
+    function showCsrfError(message) {
+        showCsrfMessage(message, 'error');
+    }
+    
+    function showCsrfSuccess(message) {
+        showCsrfMessage(message, 'success');
+    }
+    
+    function showCsrfMessage(message, type) {
+        const form = document.querySelector('.csrf-enhanced-form');
+        let messageDiv = form.querySelector('.csrf-message');
+        
+        if (!messageDiv) {
+            messageDiv = document.createElement('div');
+            messageDiv.className = 'csrf-message';
+            form.insertBefore(messageDiv, form.firstChild);
+        }
+        
+        messageDiv.className = `csrf-message csrf-${type}`;
+        messageDiv.textContent = message;
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    function updateDebugInfo() {
+        const debugElement = document.getElementById('csrf-debug-output');
+        const debugInfoElement = document.getElementById('csrf-debug-info');
+        
+        if (debugElement && debugInfoElement) {
+            try {
+                const debugInfo = JSON.parse(debugInfoElement.textContent);
+                debugElement.textContent = JSON.stringify(debugInfo, null, 2);
+            } catch (e) {
+                debugElement.textContent = 'Error parsing debug info: ' + e.message;
+            }
+        }
+    }
+    
+    // Make functions globally available
+    window.refreshCsrfToken = refreshCsrfToken;
+    window.validateCsrfToken = validateCsrfToken;
+    </script>
+{% endmacro %}

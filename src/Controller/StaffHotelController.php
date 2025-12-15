@@ -72,22 +72,32 @@ class StaffHotelController extends AbstractController
         $form = $this->createForm(HotelType::class, $hotel);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $imageFile = $form->get('image')->getData();
+        if ($form->isSubmitted()) {
+            if (!$form->isValid()) {
+                error_log('Form validation failed for hotel ' . $hotel->getId());
+                $errors = $form->getErrors(true);
+                foreach ($errors as $error) {
+                    error_log('Error: ' . $error->getMessage());
+                }
+            } else {
+                $imageFile = $form->get('image')->getData();
 
-            if ($imageFile) {
-                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
-                $imageFile->move(
-                    $this->getParameter('kernel.project_dir') . '/public/uploads',
-                    $newFilename
-                );
-                $hotel->setImage($newFilename);
+                if ($imageFile) {
+                    $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                    $imageFile->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads',
+                        $newFilename
+                    );
+                    $hotel->setImage($newFilename);
+                }
+
+                $entityManager->persist($hotel);
+                $entityManager->flush();
+                error_log('Hotel ' . $hotel->getId() . ' updated successfully');
+
+                $this->addFlash('success', 'Hotel updated successfully!');
+                return $this->redirectToRoute('staff_hotels_index');
             }
-
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Hotel updated successfully!');
-            return $this->redirectToRoute('staff_hotels_index');
         }
 
         return $this->render('staff/hotels/edit.html.twig', [

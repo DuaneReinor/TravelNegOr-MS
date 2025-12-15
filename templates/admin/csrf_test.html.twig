@@ -1,0 +1,471 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}CSRF Token Test - {{ parent() }}{% endblock %}
+
+{% block admin_content %}
+<div class="admin-content">
+    <div class="page-header">
+        <h1><i class="icon-shield"></i> CSRF Token Test</h1>
+        <p>Testing CSRF token functionality for ngrok compatibility</p>
+    </div>
+
+    <div class="test-container">
+        <div class="test-results">
+            <h2>Test Results</h2>
+            <div class="results-grid">
+                {% for testName, result in test_results %}
+                    <div class="test-card {{ result.success ? 'success' : 'error' }}">
+                        <h3>{{ testName|title|replace({'_': ' '}) }}</h3>
+                        <div class="test-status">
+                            {% if result.success %}
+                                <span class="status-icon success">✓</span>
+                                <span class="status-text success">PASSED</span>
+                            {% else %}
+                                <span class="status-icon error">✗</span>
+                                <span class="status-text error">FAILED</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if result.message is defined %}
+                            <p class="test-message">{{ result.message }}</p>
+                        {% endif %}
+                        
+                        {% if result.error is defined %}
+                            <div class="error-details">
+                                <strong>Error:</strong> {{ result.error }}
+                                {% if result.trace is defined %}
+                                    <details>
+                                        <summary>Stack Trace</summary>
+                                        <pre>{{ result.trace }}</pre>
+                                    </details>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="test-details">
+                            {% for key, value in result %}
+                                {% if key not in ['success', 'message', 'error', 'trace'] %}
+                                    <div class="detail-item">
+                                        <strong>{{ key|title|replace({'_': ' ' }) }}:</strong> 
+                                        {% if value is same as(true) %}
+                                            <span class="boolean true">true</span>
+                                        {% elseif value is same as(false) %}
+                                            <span class="boolean false">false</span>
+                                        {% elseif value is iterable %}
+                                            <pre>{{ value|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                                        {% else %}
+                                            <span class="value">{{ value }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="test-actions">
+            <h2>Manual Tests</h2>
+            <div class="action-buttons">
+                <button onclick="testTokenGeneration()" class="btn btn-primary">
+                    <i class="icon-refresh"></i> Test Token Generation
+                </button>
+                
+                <button onclick="testTokenValidation()" class="btn btn-secondary">
+                    <i class="icon-check"></i> Test Token Validation
+                </button>
+                
+                <button onclick="testTokenRefresh()" class="btn btn-info">
+                    <i class="icon-edit"></i> Test Token Refresh
+                </button>
+                
+                <button onclick="cleanupTokens()" class="btn btn-warning">
+                    <i class="icon-trash"></i> Cleanup Tokens
+                </button>
+                
+                <button onclick="showDebugInfo()" class="btn btn-dark">
+                    <i class="icon-info"></i> Show Debug Info
+                </button>
+            </div>
+            
+            <div id="test-output" class="test-output" style="display: none;">
+                <h3>Test Output</h3>
+                <pre id="test-output-content"></pre>
+            </div>
+        </div>
+
+        <div class="current-session-info">
+            <h2>Session Information</h2>
+            <div class="session-details">
+                <div class="info-item">
+                    <strong>Session ID:</strong> 
+                    <span class="session-id">{{ app.session.id|default('No active session') }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>Session Name:</strong> 
+                    <span class="session-name">{{ app.session.name|default('N/A') }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>Environment:</strong> 
+                    <span class="environment">{{ app.environment }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>Timestamp:</strong> 
+                    <span class="timestamp">{{ timestamp }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>User Agent:</strong> 
+                    <span class="user-agent">{{ app.request.headers.get('User-Agent')|slice(0, 100) }}...</span>
+                </div>
+                <div class="info-item">
+                    <strong>Client IP:</strong> 
+                    <span class="client-ip">{{ app.request.clientIp }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 2rem;
+    margin: -2rem -2rem 2rem -2rem;
+    border-radius: 0 0 1rem 1rem;
+}
+
+.test-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.test-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid #ddd;
+}
+
+.test-card.success {
+    border-left-color: #28a745;
+    background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+}
+
+.test-card.error {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, #fff9f9 0%, #f5e8e8 100%);
+}
+
+.test-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.status-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.status-icon.success { color: #28a745; }
+.status-icon.error { color: #dc3545; }
+
+.status-text {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.status-text.success { color: #28a745; }
+.status-text.error { color: #dc3545; }
+
+.test-details {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.detail-item {
+    margin: 0.5rem 0;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.boolean.true { color: #28a745; font-weight: bold; }
+.boolean.false { color: #dc3545; font-weight: bold; }
+
+.value {
+    font-family: monospace;
+    background: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+}
+
+.error-details {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 4px;
+    color: #c33;
+}
+
+.error-details pre {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    background: #f5f5f5;
+    padding: 0.5rem;
+    border-radius: 3px;
+    overflow-x: auto;
+}
+
+.test-actions {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary { background: #007bff; color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-info { background: #17a2b8; color: white; }
+.btn-warning { background: #ffc107; color: #212529; }
+.btn-dark { background: #343a40; color: white; }
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.test-output {
+    margin-top: 2rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.test-output pre {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.9rem;
+}
+
+.session-details {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.session-id, .session-name, .environment, .timestamp, .user-agent, .client-ip {
+    font-family: monospace;
+    background: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-item {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+</style>
+
+<script>
+async function testTokenGeneration() {
+    const output = document.getElementById('test-output');
+    const content = document.getElementById('test-output-content');
+    
+    try {
+        output.style.display = 'block';
+        content.textContent = 'Testing token generation...';
+        
+        const response = await fetch('/admin/csrf/refresh/test_token', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        content.textContent = JSON.stringify(result, null, 2);
+        
+    } catch (error) {
+        content.textContent = 'Error: ' + error.message;
+    }
+}
+
+async function testTokenValidation() {
+    const output = document.getElementById('test-output');
+    const content = document.getElementById('test-output-content');
+    
+    try {
+        output.style.display = 'block';
+        content.textContent = 'Testing token validation...';
+        
+        // First generate a token
+        const generateResponse = await fetch('/admin/csrf/refresh/test_token', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const generateResult = await generateResponse.json();
+        
+        // Then validate it
+        const formData = new FormData();
+        formData.append('_csrf_token', generateResult.token);
+        
+        const validateResponse = await fetch('/admin/csrf/validate/test_token', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const validateResult = await validateResponse.json();
+        content.textContent = JSON.stringify({
+            generation: generateResult,
+            validation: validateResult
+        }, null, 2);
+        
+    } catch (error) {
+        content.textContent = 'Error: ' + error.message;
+    }
+}
+
+async function testTokenRefresh() {
+    const output = document.getElementById('test-output');
+    const content = document.getElementById('test-output-content');
+    
+    try {
+        output.style.display = 'block';
+        content.textContent = 'Testing token refresh...';
+        
+        const response = await fetch('/admin/csrf/refresh/test_token', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        content.textContent = JSON.stringify(result, null, 2);
+        
+    } catch (error) {
+        content.textContent = 'Error: ' + error.message;
+    }
+}
+
+async function cleanupTokens() {
+    const output = document.getElementById('test-output');
+    const content = document.getElementById('test-output-content');
+    
+    try {
+        output.style.display = 'block';
+        content.textContent = 'Cleaning up expired tokens...';
+        
+        const response = await fetch('/admin/csrf/cleanup', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        content.textContent = JSON.stringify(result, null, 2);
+        
+    } catch (error) {
+        content.textContent = 'Error: ' + error.message;
+    }
+}
+
+async function showDebugInfo() {
+    const output = document.getElementById('test-output');
+    const content = document.getElementById('test-output-content');
+    
+    try {
+        output.style.display = 'block';
+        content.textContent = 'Getting debug information...';
+        
+        const response = await fetch('/admin/csrf/debug/test_token', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        const result = await response.json();
+        content.textContent = JSON.stringify(result, null, 2);
+        
+    } catch (error) {
+        content.textContent = 'Error: ' + error.message;
+    }
+}
+</script>
+{% endblock %}

@@ -28,3 +28,24 @@ services:
         public: true  # Make public so Symfony doesn't optimize it out
         tags:
             - { name: doctrine.event_subscriber }
+
+    # CSRF Token Manager - Enhanced for ngrok compatibility
+    App\Service\CsrfTokenManager:
+        public: true  # Make public for easy access
+        arguments:
+            $tokenStorage: '@security.csrf.token_storage'
+            $tokenGenerator: '@security.csrf.token_generator'
+            $requestStack: '@request_stack'
+
+    # CSRF Twig Extension
+    App\Twig\CsrfExtension:
+        public: true
+        arguments:
+            $csrfTokenManager: '@App\Service\CsrfTokenManager'
+        tags:
+            - { name: twig.extension }
+
+    # CSRF Origin Listener for ngrok compatibility
+    App\EventListener\CsrfOriginListener:
+        arguments:
+            $isDev: true

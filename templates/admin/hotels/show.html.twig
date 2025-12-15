@@ -25,7 +25,7 @@
         <div class="actions">
             <a href="{{ path('admin_hotels_edit', {'id': hotel.id}) }}" class="btn btn-edit">Edit</a>
             <a href="{{ path('admin_hotels_index') }}" class="btn btn-back">Back to list</a>
-            {{ include('admin/hotels/_delete_form.html.twig') }}
+            {{ include('admin/hotels/_delete_form.html.twig', {'hotel': hotel}) }}
         </div>
     </div>
 </div>
@@ -121,6 +121,25 @@
 .btn-back:hover {
     background-color: #74C15A;
     color: white;
+}
+
+/* Delete button styling */
+.delete-form {
+    display: inline-block;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.btn-delete:active {
+    background-color: #bd2130;
 }
 </style>
 {% endblock %}

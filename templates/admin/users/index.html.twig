@@ -50,7 +50,7 @@
                             <td class="actions">
                                 <a href="{{ path('admin_users_show', {'id': user.id}) }}" class="btn-action view">View</a>
                                 <a href="{{ path('admin_users_edit', {'id': user.id}) }}" class="btn-action edit">Edit</a>
-                                {{ include('admin/users/_delete_form.html.twig') }}
+                                {{ include('admin/users/_delete_form.html.twig', {'user': user}) }}
                             </td>
                         </tr>
                     {% else %}

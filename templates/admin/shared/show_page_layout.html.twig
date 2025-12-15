@@ -1,0 +1,354 @@
+{# 
+    Shared Show Page Layout Component
+    Provides consistent styling and structure for all admin show pages
+#}
+
+{% macro render_show_page(entity, back_path, entity_name, page_title, fields_config, edit_path, delete_form_path) %}
+<div class="admin-show-container">
+    <div class="admin-show-header">
+        <div class="admin-show-nav">
+            <a href="{{ back_path }}" class="admin-nav-back">
+                ← Back to {{ entity_name }}
+            </a>
+        </div>
+        <h1 class="admin-show-title">{{ page_title }}</h1>
+        <p class="admin-show-subtitle">View detailed information and manage {{ entity_name|lower }}</p>
+    </div>
+
+    <div class="admin-show-content">
+        <div class="admin-show-card">
+            <div class="admin-show-section">
+                <div class="admin-show-grid">
+                    {% for field_config in fields_config %}
+                        {% set field_name = field_config.name %}
+                        {% set field_label = field_config.label|default(field_name|title) %}
+                        {% set field_type = field_config.type|default('text') %}
+                        {% set field_value = attribute(entity, field_name) %}
+                        {% set show_empty = field_config.show_empty|default(false) %}
+                        
+                        {% if field_value is not empty or show_empty %}
+                            <div class="admin-show-field {{ field_type }}">
+                                <label class="admin-field-label">
+                                    {{ field_label }}
+                                </label>
+                                
+                                <div class="admin-field-value">
+                                    {% if field_type == 'image' and field_value %}
+                                        <img src="{{ asset('uploads/' ~ field_value) }}" alt="{{ field_label }}" class="admin-show-image">
+                                    {% elseif field_type == 'image' and not field_value %}
+                                        <div class="admin-no-image">
+                                            📷 No Image Available
+                                        </div>
+                                    {% elseif field_type == 'date' and field_value %}
+                                        {{ field_value|date('M j, Y g:i A') }}
+                                    {% elseif field_type == 'boolean' %}
+                                        {% if field_value %}
+                                            <span class="admin-boolean admin-boolean-true">✅ Yes</span>
+                                        {% else %}
+                                            <span class="admin-boolean admin-boolean-false">❌ No</span>
+                                        {% endif %}
+                                    {% elseif field_type == 'currency' and field_value %}
+                                        ₱{{ field_value|number_format(2) }}
+                                    {% elseif field_type == 'text' and field_value %}
+                                        {{ field_value|nl2br }}
+                                    {% else %}
+                                        {{ field_value|default('N/A') }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="admin-show-actions">
+                <a href="{{ back_path }}" class="admin-btn admin-btn-secondary">
+                    ← Back to List
+                </a>
+                <a href="{{ edit_path }}" class="admin-btn admin-btn-primary">
+                    ✏️ Edit {{ entity_name|slice(0, -1) }}
+                </a>
+                {% if entity_name == 'Users' %}
+                    {{ include(delete_form_path, {'user': entity}) }}
+                {% elseif entity_name == 'Hotels' %}
+                    {{ include(delete_form_path, {'hotel': entity}) }}
+                {% elseif entity_name == 'Destinations' %}
+                    {{ include(delete_form_path, {'id': entity.id}) }}
+                {% else %}
+                    {{ include(delete_form_path, {'entity': entity}) }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Admin Show Page Styles - Unified Design System with Green Theme */
+.admin-show-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    padding: 2rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.admin-show-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+.admin-show-nav {
+    margin-bottom: 1.5rem;
+}
+
+.admin-nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.admin-nav-back:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.admin-show-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.admin-show-subtitle {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    font-weight: 400;
+}
+
+.admin-show-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.admin-show-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.admin-show-section {
+    padding: 2.5rem;
+}
+
+.admin-show-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.admin-show-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.admin-show-field:hover {
+    background: #f1f5f9;
+    border-color: #10b981;
+    transform: translateY(-1px);
+}
+
+.admin-show-field.image {
+    grid-column: 1 / -1;
+    text-align: center;
+    background: white;
+    border: 2px dashed #e5e7eb;
+}
+
+.admin-show-field.image:hover {
+    background: white;
+    border-color: #10b981;
+}
+
+.admin-field-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.admin-field-value {
+    font-size: 1rem;
+    color: #111827;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.admin-show-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #10b981;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.admin-no-image {
+    padding: 3rem 2rem;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.admin-boolean {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.admin-boolean-true {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.admin-boolean-false {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.admin-show-actions {
+    padding: 2rem 2.5rem;
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.admin-btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+}
+
+.admin-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.4);
+}
+
+.admin-btn-secondary {
+    background: white;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+}
+
+.admin-btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+    transform: translateY(-1px);
+}
+
+/* Delete form styling */
+.admin-show-actions .delete-form {
+    display: inline-block;
+}
+
+.admin-btn-delete {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.3);
+}
+
+.admin-btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(239, 68, 68, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-show-container {
+        padding: 1rem;
+    }
+    
+    .admin-show-title {
+        font-size: 1.75rem;
+    }
+    
+    .admin-show-section {
+        padding: 1.5rem;
+    }
+    
+    .admin-show-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .admin-show-actions {
+        padding: 1.5rem;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .admin-btn {
+        width: 100%;
+    }
+}
+</style>
+{% endmacro %}

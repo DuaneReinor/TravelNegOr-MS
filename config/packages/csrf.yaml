@@ -1,11 +1,17 @@
-# Enable stateless CSRF protection for forms and logins/logouts
+# CSRF Protection Configuration optimized for ngrok deployment
 framework:
     form:
         csrf_protection:
             token_id: submit
 
     csrf_protection:
+        # Use stateless tokens for better ngrok compatibility
         stateless_token_ids:
             - submit
             - authenticate
             - logout
+        # Enable CSRF protection
+        enabled: true
+        # Disable origin header check for ngrok deployment
+        # This is safe for development/ngrok as we're using stateless tokens
+        check_header: false

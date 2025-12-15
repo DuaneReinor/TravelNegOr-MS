@@ -3,53 +3,24 @@
 {% block title %}Destination Details{% endblock %}
 
 {% block admin_content %}
-<div class="crud-container">
-    <div class="crud-card">
-        <h1 class="title">{{ destination.name }}</h1>
+{% from 'admin/shared/show_page_layout.html.twig' import render_show_page %}
 
-        <div class="hotel-info">
-            {% if destination.image %}
-                <img src="{{ asset('uploads/images/' ~ destination.image) }}" alt="{{ destination.name }}" class="hotel-img">
-            {% else %}
-                <div class="no-image">No Image Available</div>
-            {% endif %}
+{% set fields_config = [
+    {'name': 'id', 'label': 'ID', 'type': 'text'},
+    {'name': 'name', 'label': 'Destination Name', 'type': 'text'},
+    {'name': 'location', 'label': 'Location', 'type': 'text'},
+    {'name': 'description', 'label': 'Description', 'type': 'text'},
+    {'name': 'image', 'label': 'Destination Image', 'type': 'image', 'show_empty': true},
+    {'name': 'createdAt', 'label': 'Created At', 'type': 'date'}
+] %}
 
-            <div class="details">
-                <p><strong>ID:</strong> {{ destination.id }}</p>
-                <p><strong>Description:</strong> {{ destination.description }}</p>
-                <p><strong>Location:</strong> {{ destination.location }}</p>
-            </div>
-        </div>
-
-        <div class="actions">
-            <a href="{{ path('admin_destinations_edit', {'id': destination.id}) }}" class="btn btn-edit">Edit</a>
-            <a href="{{ path('admin_destinations_index') }}" class="btn btn-back">Back to list</a>
-            {{ include\('admin/destinations/_delete_form\.html\.twig', \{'id': destination\.id\}\) }}
-        </div>
-    </div>
-</div>
-
-<style>
-.crud-container { display: flex; justify-content: center; padding: 50px; font-family: 'Montserrat', sans-serif; }
-.crud-card {
-    background: #ffffff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    width: 100%; max-width: 800px; padding: 40px; border: 1px solid #e0e0e0;
-}
-.title { text-align: center; color: #74C15A; font-family: 'Poppins', sans-serif; margin-bottom: 30px; }
-.hotel-info { display: flex; gap: 25px; align-items: flex-start; }
-.hotel-img {
-    width: 220px; height: 160px; border-radius: 10px; object-fit: cover; border: 2px solid #74C15A;
-}
-.no-image {
-    width: 220px; height: 160px; background: #f8f8f8; border: 2px dashed #74C15A;
-    border-radius: 10px; color: #777; display: flex; align-items: center; justify-content: center;
-}
-.details p { margin: 10px 0; color: #333; font-size: 15px; }
-.actions { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
-.btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; }
-.btn-edit { background-color: #74C15A; color: white; }
-.btn-edit:hover { background-color: #5ca74b; }
-.btn-back { border: 2px solid #74C15A; color: #74C15A; }
-.btn-back:hover { background-color: #74C15A; color: white; }
-</style>
+{{ render_show_page(
+    destination,
+    path('admin_destinations_index'),
+    'Destinations',
+    destination.name,
+    fields_config,
+    path('admin_destinations_edit', {'id': destination.id}),
+    'admin/destinations/_delete_form.html.twig'
+) }}
 {% endblock %}

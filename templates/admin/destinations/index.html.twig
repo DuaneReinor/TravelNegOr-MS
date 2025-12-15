@@ -58,7 +58,7 @@
                             <td class="actions">
                                 <a href="{{ path('admin_destinations_show', {'id': destination.id}) }}" class="btn-action view">View</a>
                                 <a href="{{ path('admin_destinations_edit', {'id': destination.id}) }}" class="btn-action edit">Edit</a>
-                                {{ include('admin/destinations/_delete_form.html.twig') }}
+                                {{ include('admin/destinations/_delete_form.html.twig', {'id': destination.id}) }}
                             </td>
                         </tr>
                     {% else %}
